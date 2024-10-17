@@ -1,4 +1,54 @@
 // DOM Content Loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const carousel = document.querySelector('.testimonial-carousel');
+    const cards = carousel.querySelectorAll('.testimonial-card');
+    const prevBtn = document.querySelector('.prev-testimonial');
+    const nextBtn = document.querySelector('.next-testimonial');
+    const indicators = document.querySelector('.testimonial-indicators');
+
+    let currentIndex = 0;
+
+    // Create indicators
+    cards.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.classList.add('indicator');
+        if (index === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => goToSlide(index));
+        indicators.appendChild(dot);
+    });
+
+    function updateCarousel() {
+        carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+        updateIndicators();
+    }
+
+    function updateIndicators() {
+        document.querySelectorAll('.indicator').forEach((indicator, index) => {
+            indicator.classList.toggle('active', index === currentIndex);
+        });
+    }
+
+    function goToSlide(index) {
+        currentIndex = index;
+        updateCarousel();
+    }
+
+    function nextSlide() {
+        currentIndex = (currentIndex + 1) % cards.length;
+        updateCarousel();
+    }
+
+    function prevSlide() {
+        currentIndex = (currentIndex - 1 + cards.length) % cards.length;
+        updateCarousel();
+    }
+
+    nextBtn.addEventListener('click', nextSlide);
+    prevBtn.addEventListener('click', prevSlide);
+
+    // Auto-play
+    setInterval(nextSlide, 5000);
+});
 document.addEventListener("DOMContentLoaded", () => {
     // Enhanced Carousel Functionality
     class Carousel {
