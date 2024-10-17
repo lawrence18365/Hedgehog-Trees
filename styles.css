@@ -150,7 +150,6 @@ nav ul li a:hover {
     color: var(--white);
     text-align: left;
     max-width: 1000px;
-    margin-top: -400px;
     margin-right: 700px;
     padding: 0 20px;
 }
