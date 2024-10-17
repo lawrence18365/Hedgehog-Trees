@@ -81,11 +81,14 @@ padding: 20px;
 }
 
 .hero-content {
-    max-width: 800px;
     margin: 0 auto;
     padding: 0 20px;
     color: white;
     text-align: left;
+    max-width: 1000px;
+    margin-top: -400px;
+    margin-right: 700px;
+}
 }
 
 #hero h1 {
