@@ -30,130 +30,72 @@ margin: 0 auto;
 padding: 20px;
 }
 /* Header Styles */
-#header {
-background-color: var(--white);
-color: var(--text-dark);
-padding: 15px 0;
-position: fixed;
-top: 0;
-width: 100%;
-z-index: 1000;
-box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-transition: all 0.3s ease-in-out;
-}
-#header .container {
-display: flex;
-justify-content: space-between;
-align-items: center;
-}
-#header .logo {
-max-width: 120px;
-transition: transform 0.3s ease;
-}
-#header .logo:hover {
-transform: scale(1.05);
-}
-#header nav ul {
-list-style: none;
-display: flex;
-gap: 30px;
-}
-#header nav ul li a {
-color: var(--text-dark);
-text-decoration: none;
-font-weight: 600;
-transition: all 0.3s;
-padding: 10px;
-border-radius: 5px;
-text-transform: uppercase;
-font-size: 0.9rem;
-letter-spacing: 1px;
-}
-#header nav ul li a:hover {
-color: var(--primary-green);
-background-color: rgba(46, 204, 113, 0.1);
-}
-.cta-button {
-background-color: var(--primary-green);
-color: var(--white);
-padding: 12px 24px;
-border: none;
-text-decoration: none;
-border-radius: 50px;
-transition: all 0.3s;
-font-weight: 600;
-text-transform: uppercase;
-letter-spacing: 1px;
-font-size: 0.9rem;
-}
-.cta-button:hover {
-background-color: var(--dark-green);
-transform: translateY(-2px);
-box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
-}
 /* Hero Section Styles */
 #hero {
-background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1518795879763-4536a6f6ace2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center/cover;
-height: 100vh;
-display: flex;
-align-items: center;
-text-align: left;
-padding-top: 80px;
+    height: 100vh;
+    background: url('https://black-forest-labs-flux-1-schnell.hf.space/file=/tmp/gradio/10f15c12d2e9b4b312ea074f0e0e1ef1e6f527eb/image.webp') no-repeat center center;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    padding-top: 80px; /* Adjust for fixed header */
 }
-#hero .hero-content {
-max-width: 600px;
+
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+    color: white;
+    text-align: left;
 }
+
 #hero h1 {
-font-size: 3.5rem;
-color: var(--white);
-margin-bottom: 20px;
-font-weight: 700;
-line-height: 1.2;
-text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
+
 #hero p {
-font-size: 1.2rem;
-color: var(--text-light);
-margin-bottom: 40px;
-font-weight: 300;
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
+
+.hero-buttons {
+    display: flex;
+    gap: 20px;
+}
+
 .hero-button {
-background-color: var(--primary-green);
-color: var(--white);
-padding: 15px 30px;
-border: none;
-text-decoration: none;
-border-radius: 50px;
-font-weight: 600;
-transition: all 0.3s;
-text-transform: uppercase;
-letter-spacing: 1px;
-display: inline-block;
-margin-right: 15px;
+    padding: 12px 24px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
 }
-.hero-button:hover {
-background-color: var(--dark-green);
-transform: translateY(-3px);
-box-shadow: 0 6px 12px rgba(46, 204, 113, 0.3);
+
+.primary-button {
+    background-color: #2ecc71;
+    color: white;
 }
+
 .secondary-button {
-background-color: transparent;
-color: var(--white);
-border: 2px solid var(--white);
-padding: 13px 28px;
-text-decoration: none;
-border-radius: 50px;
-font-weight: 600;
-transition: all 0.3s;
-text-transform: uppercase;
-letter-spacing: 1px;
-display: inline-block;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid white;
 }
+
+.hero-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.primary-button:hover {
+    background-color: #27ae60;
+}
+
 .secondary-button:hover {
-background-color: var(--white);
-color: var(--text-dark);
-transform: translateY(-3px);
-box-shadow: 0 6px 12px rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.3);
 }
 /* About Us Section Styles */
 #about {
@@ -241,73 +183,7 @@ color: var(--text-dark);
     box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
 }
 
-/* Hero Section Styles */
-#hero {
-    height: 100vh;
-    background: url('https://black-forest-labs-flux-1-schnell.hf.space/file=/tmp/gradio/10f15c12d2e9b4b312ea074f0e0e1ef1e6f527eb/image.webp') no-repeat center center;
-    background-size: cover;
-    display: flex;
-    align-items: center;
-    padding-top: 80px; /* Adjust for fixed header */
-}
 
-.hero-content {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 0 20px;
-    color: white;
-    text-align: left;
-}
-
-#hero h1 {
-    font-size: 3.5rem;
-    margin-bottom: 20px;
-    font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-}
-
-#hero p {
-    font-size: 1.2rem;
-    margin-bottom: 30px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-}
-
-.hero-buttons {
-    display: flex;
-    gap: 20px;
-}
-
-.hero-button {
-    padding: 12px 24px;
-    border-radius: 25px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: all 0.3s ease;
-}
-
-.primary-button {
-    background-color: #2ecc71;
-    color: white;
-}
-
-.secondary-button {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: 2px solid white;
-}
-
-.hero-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-
-.primary-button:hover {
-    background-color: #27ae60;
-}
-
-.secondary-button:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-}
 /* Testimonials Section Styles */
 #testimonials {
 background-color: var(--primary-green);
