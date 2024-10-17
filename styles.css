@@ -129,7 +129,7 @@ nav ul li a:hover {
 /* Hero Section Styles */
 #hero {
     height: 100vh;
-    background: url('https://cdn-uploads.huggingface.co/production/uploads/noauth/qY_smp_hq2i-cU_le8rNI.webp') no-repeat center center;
+    background: url('https://black-forest-labs-flux-1-schnell.hf.space/file=/tmp/gradio/013a4bd6ff15eb2566dd03c449845f4b44a86160/image.webp') no-repeat center center;
     background-size: cover;
     display: flex;
     align-items: center;
