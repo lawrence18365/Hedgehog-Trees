@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hedgehog Trees & Trimming</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!-- Font Awesome Icons -->
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="container">
+            <img src="https://i.postimg.cc/x1znzdVz/Untitled-design-14-modified.png" alt="Hedgehog Trees & Trimming Logo" class="logo">
+            <nav>
+                <ul>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#testimonials">Testimonials</a></li>
+                    <li><a href="#contact">Contact Us</a></li>
+                </ul>
+            </nav>
+            <a href="#contact" class="cta-button">Get a Free Quote</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero">
+        <div class="hero-content">
+            <h1>Professional Tree Trimming with a Personal Touch</h1>
+            <p>From hedges to towering trees, we’ve got you covered.</p>
+            <a href="#contact" class="hero-button">Get a Free Quote</a>
+            <a href="#testimonials" class="secondary-button">See Our Work</a>
+        </div>
+        <div class="hero-overlay"></div>
+        <video autoplay muted loop id="hero-video">
+            <source src="hero-video.mp4" type="video/mp4">
+            Your browser does not support HTML5 video.
+        </video>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about">
+        <div class="container">
+            <h2>Who We Are</h2>
+            <p>At Hedgehog Trees & Trimming, we provide professional tree services with a friendly, down-to-earth approach. Our experienced team is dedicated to keeping your property safe, beautiful, and healthy.</p>
+            <div class="key-benefits">
+                <div class="benefit">
+                    <img src="eco-icon.png" alt="Eco Friendly">
+                    <h3>Eco-Friendly Practices</h3>
+                    <p>We care about the environment and ensure our practices are sustainable.</p>
+                </div>
+                <div class="benefit">
+                    <img src="insurance-icon.png" alt="Fully Insured">
+                    <h3>Fully Insured</h3>
+                    <p>Our team is fully insured, giving you peace of mind during every project.</p>
+                </div>
+                <div class="benefit">
+                    <img src="team-icon.png" alt="Experienced Team">
+                    <h3>Experienced Team</h3>
+                    <p>Our skilled professionals are trained to handle any tree service safely and efficiently.</p>
+                </div>
+                <div class="benefit">
+                    <img src="service-icon.png" alt="Same-Day Service">
+                    <h3>Same-Day Service Available</h3>
+                    <p>We offer prompt, same-day services to meet your urgent needs.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services">
+        <div class="container">
+            <h2>Our Services</h2>
+            <div class="service-grid">
+                <div class="service-box">
+                    <img src="tree-trimming.png" alt="Tree Trimming">
+                    <h3>Tree Trimming</h3>
+                    <p>Professional trimming to keep your trees healthy and beautiful.</p>
+                </div>
+                <div class="service-box">
+                    <img src="hedge-shaping.png" alt="Hedge Shaping">
+                    <h3>Hedge Shaping</h3>
+                    <p>Neat and tidy hedges for a polished landscape.</p>
+                </div>
+                <div class="service-box">
+                    <img src="stump-removal.png" alt="Stump Removal">
+                    <h3>Stump Removal</h3>
+                    <p>Efficient and safe stump grinding and removal.</p>
+                </div>
+                <div class="service-box">
+                    <img src="emergency-tree.png" alt="Emergency Tree Removal">
+                    <h3>Emergency Tree Removal</h3>
+                    <p>Quick response to storm-damaged or hazardous trees.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials">
+        <div class="container">
+            <h2>What Our Clients Say</h2>
+            <div class="testimonial-carousel">
+                <div class="testimonial">
+                    <i class="fas fa-quote-left"></i>
+                    <p>“Hedgehog Trees & Trimming did an amazing job with our property. The team was friendly, professional, and very efficient.”</p>
+                    <h4>- Sarah K.</h4>
+                </div>
+                <div class="testimonial">
+                    <i class="fas fa-quote-left"></i>
+                    <p>“Excellent service, affordable pricing, and a fantastic crew. Highly recommend them for any tree-related needs.”</p>
+                    <h4>- John M.</h4>
+                </div>
+                <div class="testimonial">
+                    <i class="fas fa-quote-left"></i>
+                    <p>“They arrived on time and did a great job. Very happy with the results!”</p>
+                    <h4>- Emily R.</h4>
+                </div>
+            </div>
+            <a href="#contact" class="cta-button">Get a Free Quote</a>
+        </div>
+    </section>
+
+    <!-- Contact Us Section -->
+    <section id="contact">
+        <div class="container">
+            <h2>Contact Us Today</h2>
+            <form action="submit-form.php" method="post" id="contact-form">
+                <div class="form-group">
+                    <input type="text" name="name" placeholder="Your Name" required>
+                    <input type="tel" name="phone" placeholder="Phone Number" required>
+                    <input type="email" name="email" placeholder="Email Address" required>
+                </div>
+                <textarea name="message" placeholder="Your Message"></textarea>
+                <button type="submit">Submit & Get Your Free Quote</button>
+            </form>
+            <div class="contact-info">
+                <p><strong>Phone:</strong> <a href="tel:+123456789">+1 234 567 89</a></p>
+                <p><strong>Email:</strong> <a href="mailto:info@hedgehogtrimming.com">info@hedgehogtrimming.com</a></p>
+                <p><strong>Operating Hours:</strong> Mon-Fri 8am - 6pm</p>
+                <p><strong>Service Areas:</strong> Sydney and nearby suburbs</p>
+            </div>
+            <div class="social-media">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="footer">
+        <div class="container">
+            <p>&copy; 2024 Hedgehog Trees & Trimming. All Rights Reserved.</p>
+            <ul>
+                <li><a href="#">Privacy Policy</a></li>
+                <li><a href="#">Terms & Conditions</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Carousel and Interactivity -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Simple carousel for testimonials
+            let currentIndex = 0;
+            const testimonials = $('.testimonial');
+            const testimonialCount = testimonials.length;
+
+            function showTestimonial(index) {
+                testimonials.hide();
+                testimonials.eq(index).fadeIn();
+            }
+
+            function nextTestimonial() {
+                currentIndex = (currentIndex + 1) % testimonialCount;
+                showTestimonial(currentIndex);
+            }
+
+            // Show first testimonial and set interval
+            showTestimonial(currentIndex);
+            setInterval(nextTestimonial, 5000);
+        });
+    </script>
+</body>
+</html>
