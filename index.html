@@ -162,30 +162,8 @@
             </ul>
         </div>
     </footer>
-
-    <!-- JavaScript for Carousel and Interactivity -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Simple carousel for testimonials
-            let currentIndex = 0;
-            const testimonials = $('.testimonial');
-            const testimonialCount = testimonials.length;
-
-            function showTestimonial(index) {
-                testimonials.hide();
-                testimonials.eq(index).fadeIn();
-            }
-
-            function nextTestimonial() {
-                currentIndex = (currentIndex + 1) % testimonialCount;
-                showTestimonial(currentIndex);
-            }
-
-            // Show first testimonial and set interval
-            showTestimonial(currentIndex);
-            setInterval(nextTestimonial, 5000);
-        });
-    </script>
+<!-- JavaScript for Carousel and Interactivity -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
