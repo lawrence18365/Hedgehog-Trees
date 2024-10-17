@@ -310,15 +310,14 @@ nav ul li a:hover {
 }
 
 /* Services Section Styles */
-
-##services-section {
+.services {
     background-color: #f9f9f9;
     padding: 100px 0;
     position: relative;
     overflow: hidden;
 }
 
-##services-section::before {
+.services::before {
     content: '';
     position: absolute;
     top: 0;
@@ -330,7 +329,7 @@ nav ul li a:hover {
     transform-origin: top left;
 }
 
-##section-title {
+.section-title {
     font-size: 2.5rem;
     text-align: center;
     color: #2c3e50;
@@ -339,7 +338,7 @@ nav ul li a:hover {
     z-index: 1;
 }
 
-##section-subtitle {
+.section-subtitle {
     font-size: 1.2rem;
     text-align: center;
     color: #7f8c8d;
@@ -348,7 +347,7 @@ nav ul li a:hover {
     z-index: 1;
 }
 
-##service-grid {
+.service-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 30px;
@@ -356,7 +355,7 @@ nav ul li a:hover {
     z-index: 1;
 }
 
-##service-box {
+.service-box {
     background-color: #ffffff;
     border-radius: 15px;
     padding: 30px;
@@ -367,35 +366,35 @@ nav ul li a:hover {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-##service-box:hover {
+.service-box:hover {
     transform: translateY(-10px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
-##service-icon {
+.service-icon {
     font-size: 3rem;
     color: #2ecc71;
     margin-bottom: 20px;
     transition: all 0.3s ease;
 }
 
-##service-box:hover .service-icon {
+.service-box:hover .service-icon {
     transform: scale(1.2) rotate(10deg);
 }
 
-##service-box h3 {
+.service-box h3 {
     font-size: 1.5rem;
     color: #2c3e50;
     margin-bottom: 15px;
 }
 
-##service-box p {
+.service-box p {
     font-size: 1rem;
     color: #7f8c8d;
     margin-bottom: 20px;
 }
 
-##service-link {
+.service-link {
     display: inline-block;
     padding: 10px 20px;
     background-color: #2ecc71;
@@ -406,12 +405,12 @@ nav ul li a:hover {
     font-weight: bold;
 }
 
-##service-link:hover {
+.service-link:hover {
     background-color: #27ae60;
     transform: scale(1.05);
 }
 
-##service-hover {
+.service-hover {
     position: absolute;
     top: 0;
     left: 0;
@@ -425,17 +424,17 @@ nav ul li a:hover {
     transition: all 0.3s ease;
 }
 
-##service-box:hover .service-hover {
+.service-box:hover .service-hover {
     opacity: 1;
 }
 
-##service-details {
+.service-details {
     list-style-type: none;
     padding: 0;
     color: #ffffff;
 }
 
-##service-details li {
+.service-details li {
     font-size: 1rem;
     margin-bottom: 10px;
     opacity: 0;
@@ -443,15 +442,15 @@ nav ul li a:hover {
     transition: all 0.3s ease;
 }
 
-##service-box:hover .service-details li {
+.service-box:hover .service-details li {
     opacity: 1;
     transform: translateY(0);
 }
 
-##service-box:hover .service-details li:nth-child(1) { transition-delay: 0.1s; }
-##service-box:hover .service-details li:nth-child(2) { transition-delay: 0.2s; }
-##service-box:hover .service-details li:nth-child(3) { transition-delay: 0.3s; }
-##service-box:hover .service-details li:nth-child(4) { transition-delay: 0.4s; }
+.service-box:hover .service-details li:nth-child(1) { transition-delay: 0.1s; }
+.service-box:hover .service-details li:nth-child(2) { transition-delay: 0.2s; }
+.service-box:hover .service-details li:nth-child(3) { transition-delay: 0.3s; }
+.service-box:hover .service-details li:nth-child(4) { transition-delay: 0.4s; }
 
 @keyframes float {
     0% { transform: translateY(0px); }
@@ -459,21 +458,21 @@ nav ul li a:hover {
     100% { transform: translateY(0px); }
 }
 
-##service-box {
+.service-box {
     animation: float 5s ease-in-out infinite;
 }
 
-##service-box:nth-child(1) { animation-delay: 0s; }
-##service-box:nth-child(2) { animation-delay: 1s; }
-##service-box:nth-child(3) { animation-delay: 2s; }
-##service-box:nth-child(4) { animation-delay: 3s; }
+.service-box:nth-child(1) { animation-delay: 0s; }
+.service-box:nth-child(2) { animation-delay: 1s; }
+.service-box:nth-child(3) { animation-delay: 2s; }
+.service-box:nth-child(4) { animation-delay: 3s; }
 
 @media (max-width: 768px) {
-    ##service-grid {
+    .service-grid {
         grid-template-columns: 1fr;
     }
 
-    ##service-box {
+    .service-box {
         max-width: 400px;
         margin: 0 auto;
     }
