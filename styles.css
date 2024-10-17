@@ -205,12 +205,12 @@ nav ul li a:hover {
 }
 
 /* About Us Section Styles */
-#about {
+.about {
     background: linear-gradient(to bottom, rgba(46, 204, 113, 0.1), var(--white));
     padding: 100px 0;
 }
 
-#about h2 {
+.about h2 {
     font-size: 2.5rem;
     color: var(--text-dark);
     margin-bottom: 30px;
