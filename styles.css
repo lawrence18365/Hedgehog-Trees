@@ -45,13 +45,16 @@ body {
 }
 
 /* Top Bar */
+/* Top Bar - More Compact */
 .top-bar {
     background-color: var(--primary-green);
-    padding: 5px 0;
-    font-size: 14px;
+    padding: 2px 0;  /* Reduced from 5px */
+    font-size: 13px; /* Slightly smaller font */
     color: var(--white);
     position: relative;
     z-index: 1001;
+    height: 24px; /* Fixed height */
+    line-height: 24px; /* Vertically center text */
 }
 
 .top-bar .container {
@@ -59,14 +62,19 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
+    height: 100%;
 }
 
 .contact-info span {
     margin-right: 15px;
+    display: inline-flex;
+    align-items: center;
 }
 
-.contact-info i, .social-links i {
+.contact-info i, 
+.social-links i {
     margin-right: 5px;
+    font-size: 12px; /* Smaller icons */
 }
 
 .social-links a {
@@ -74,10 +82,46 @@ body {
     margin-left: 10px;
     text-decoration: none;
     transition: var(--transition-base);
+    display: inline-flex;
+    align-items: center;
 }
 
-.social-links a:hover {
-    color: var(--text-light);
+/* Adjust header positioning for new top bar height */
+#header {
+    position: fixed;
+    top: 24px; /* Match new top bar height */
+    left: 0;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-sm);
+    z-index: 1000;
+    padding: 10px 0;
+    transition: var(--transition-base);
+}
+
+#header.scrolled {
+    top: 0;
+}
+
+/* Adjust hero section to account for new header height */
+#hero {
+    padding-top: 84px; /* 24px (top bar) + header height */
+}
+
+@media (max-width: 768px) {
+    .contact-info span {
+        font-size: 12px;
+    }
+    
+    .top-bar {
+        height: 28px; /* Slightly taller on mobile if needed */
+        line-height: 28px;
+    }
+    
+    #header {
+        top: 28px;
+    }
 }
 
 /* Header Styles */
