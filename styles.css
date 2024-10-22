@@ -46,11 +46,10 @@ body {
     padding: 0 20px;
 }
 
-/* Top Bar */
+/* Top Bar - Fixed Alignment */
 .top-bar {
     background-color: var(--primary);
     height: 30px;
-    line-height: 30px;
     font-size: 13px;
     color: var(--white);
     position: fixed;
@@ -64,33 +63,71 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    height: 100%;
     padding: 0 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.contact-info {
+    display: flex;
+    align-items: center;
     height: 100%;
 }
 
 .contact-info span {
-    margin-right: 15px;
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    margin-right: 20px;
+    height: 100%;
 }
 
-.contact-info i,
+.contact-info i, 
 .social-links i {
     margin-right: 5px;
     font-size: 12px;
 }
 
+.social-links {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    gap: 15px;
+}
+
 .social-links a {
     color: var(--white);
-    margin-left: 10px;
     text-decoration: none;
     transition: var(--transition-base);
+    display: flex;
+    align-items: center;
+    height: 100%;
 }
 
 .social-links a:hover {
     opacity: 0.8;
 }
 
+@media (max-width: 768px) {
+    .top-bar {
+        height: 40px;
+    }
+
+    .top-bar .container {
+        flex-direction: column;
+        padding: 5px 20px;
+        height: auto;
+    }
+
+    .contact-info {
+        margin-bottom: 5px;
+    }
+
+    .contact-info span {
+        font-size: 12px;
+        margin-right: 15px;
+    }
+}
 /* Header */
 #header {
     position: fixed;
