@@ -1,96 +1,159 @@
-// DOM Content Loaded
-document.addEventListener('DOMContentLoaded', function() {
-    const carousel = document.querySelector('.testimonial-carousel');
-    const cards = carousel.querySelectorAll('.testimonial-card');
-    const prevBtn = document.querySelector('.prev-testimonial');
-    const nextBtn = document.querySelector('.next-testimonial');
-    const indicators = document.querySelector('.testimonial-indicators');
+// Main Site Functionality
+document.addEventListener("DOMContentLoaded", function() {
+    // Testimonial Slider Variables
+    const track = document.querySelector('.testimonial-track');
+    const cards = Array.from(document.querySelectorAll('.testimonial-card'));
+    const prevBtn = document.querySelector('.prev-btn');
+    const nextBtn = document.querySelector('.next-btn');
+    const dotsContainer = document.querySelector('.slider-dots');
+    
+    let currentIndex = 1; // Start at second card
+    let startX;
+    let isDragging = false;
+    let currentTranslate = 0;
+    let previousTranslate = 0;
 
-    let currentIndex = 0;
-
-    // Create indicators
-    cards.forEach((_, index) => {
-        const dot = document.createElement('div');
-        dot.classList.add('indicator');
-        if (index === 0) dot.classList.add('active');
-        dot.addEventListener('click', () => goToSlide(index));
-        indicators.appendChild(dot);
-    });
-
-    function updateCarousel() {
-        carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
-        updateIndicators();
+    // Slider Functions
+    function initSlider() {
+        if (!track || !cards.length) return;
+        const cardWidth = cards[0].offsetWidth;
+        track.style.transform = `translateX(-${cardWidth * currentIndex}px)`;
+        updateDots();
+        updateButtons();
     }
 
-    function updateIndicators() {
-        document.querySelectorAll('.indicator').forEach((indicator, index) => {
-            indicator.classList.toggle('active', index === currentIndex);
+    // Create Navigation Dots
+    function createDots() {
+        if (!dotsContainer) return;
+        cards.forEach((_, index) => {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            dot.addEventListener('click', () => goToSlide(index));
+            dotsContainer.appendChild(dot);
         });
     }
 
+    // Update Navigation Dots
+    function updateDots() {
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === currentIndex);
+        });
+    }
+
+    // Update Navigation Buttons
+    function updateButtons() {
+        if (!prevBtn || !nextBtn) return;
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex === cards.length - 1;
+    }
+
+    // Go to Specific Slide
     function goToSlide(index) {
         currentIndex = index;
-        updateCarousel();
+        const cardWidth = cards[0].offsetWidth;
+        track.style.transition = 'transform 0.5s ease';
+        track.style.transform = `translateX(-${cardWidth * currentIndex}px)`;
+        updateDots();
+        updateButtons();
     }
 
+    // Next Slide
     function nextSlide() {
-        currentIndex = (currentIndex + 1) % cards.length;
-        updateCarousel();
+        if (currentIndex < cards.length - 1) {
+            goToSlide(currentIndex + 1);
+        }
     }
 
+    // Previous Slide
     function prevSlide() {
-        currentIndex = (currentIndex - 1 + cards.length) % cards.length;
-        updateCarousel();
-    }
-
-    nextBtn.addEventListener('click', nextSlide);
-    prevBtn.addEventListener('click', prevSlide);
-
-    // Auto-play
-    setInterval(nextSlide, 5000);
-});
-document.addEventListener("DOMContentLoaded", () => {
-    // Enhanced Carousel Functionality
-    class Carousel {
-        constructor(element) {
-            this.element = element;
-            this.testimonials = Array.from(this.element.querySelectorAll('.testimonial'));
-            this.currentIndex = 0;
-            this.init();
-        }
-
-        init() {
-            this.showTestimonial(this.currentIndex);
-            setInterval(() => this.nextTestimonial(), 5000); // Auto-scroll every 5 seconds
-        }
-
-        showTestimonial(index) {
-            this.testimonials.forEach((testimonial, idx) => {
-                testimonial.style.display = idx === index ? "block" : "none";
-            });
-        }
-
-        nextTestimonial() {
-            this.currentIndex = (this.currentIndex + 1) % this.testimonials.length;
-            this.showTestimonial(this.currentIndex);
+        if (currentIndex > 0) {
+            goToSlide(currentIndex - 1);
         }
     }
 
-    // Initialize Carousel
-    const testimonialCarousel = document.querySelector('.testimonial-carousel');
-    if (testimonialCarousel) {
-        new Carousel(testimonialCarousel);
+    // Touch Event Handlers
+    function touchStart(event) {
+        startX = getPositionX(event);
+        isDragging = true;
+        track.style.cursor = 'grabbing';
+    }
+
+    function touchMove(event) {
+        if (!isDragging) return;
+        
+        const currentX = getPositionX(event);
+        const diff = startX - currentX;
+        const cardWidth = cards[0].offsetWidth;
+        
+        if (
+            (currentIndex === 0 && diff < 0) || // First slide
+            (currentIndex === cards.length - 1 && diff > 0) // Last slide
+        ) {
+            return;
+        }
+        
+        currentTranslate = previousTranslate - diff;
+        track.style.transform = `translateX(${currentTranslate}px)`;
+    }
+
+    function touchEnd() {
+        isDragging = false;
+        track.style.cursor = 'grab';
+        
+        const movedBy = currentTranslate - previousTranslate;
+        
+        if (Math.abs(movedBy) > 100) {
+            if (movedBy < 0) {
+                nextSlide();
+            } else {
+                prevSlide();
+            }
+        } else {
+            goToSlide(currentIndex);
+        }
+    }
+
+    function getPositionX(event) {
+        return event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+    }
+
+    // Initialize Slider
+    if (track && cards.length) {
+        createDots();
+        initSlider();
+
+        // Event Listeners for Slider
+        if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+        if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+
+        // Touch Events
+        track.addEventListener('touchstart', touchStart);
+        track.addEventListener('touchmove', touchMove);
+        track.addEventListener('touchend', touchEnd);
+
+        // Mouse Events
+        track.addEventListener('mousedown', touchStart);
+        track.addEventListener('mousemove', touchMove);
+        track.addEventListener('mouseup', touchEnd);
+        track.addEventListener('mouseleave', touchEnd);
+
+        // Auto-play (optional)
+        setInterval(nextSlide, 5000);
+
+        // Handle Window Resize
+        window.addEventListener('resize', initSlider);
     }
 
     // Smooth Scrolling for Anchor Links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener("click", function (e) {
+        anchor.addEventListener('click', function(e) {
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute("href"));
+            const target = document.querySelector(this.getAttribute('href'));
             if (target) {
                 target.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start"
+                    behavior: 'smooth',
+                    block: 'start'
                 });
             }
         });
@@ -115,7 +178,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             if (isValid) {
-                // Placeholder for form submission logic
                 alert('Form submitted successfully!');
                 contactForm.reset();
             } else {
@@ -146,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// CSS Styles for Interactive Features
+// Add Interactive Styles
 const style = document.createElement('style');
 style.innerHTML = `
     .error {
@@ -155,25 +217,17 @@ style.innerHTML = `
     }
 
     @keyframes shake {
-        0%, 100% {
-            transform: translateX(0);
-        }
-        25% {
-            transform: translateX(-5px);
-        }
-        50% {
-            transform: translateX(5px);
-        }
-        75% {
-            transform: translateX(-5px);
-        }
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        50% { transform: translateX(5px); }
+        75% { transform: translateX(-5px); }
     }
 
     .scroll-to-top {
         position: fixed;
         bottom: 30px;
         right: 30px;
-        background-color: #1abc9c;
+        background-color: #000000;
         color: #fff;
         border: none;
         padding: 10px 15px;
@@ -182,9 +236,10 @@ style.innerHTML = `
         justify-content: center;
         align-items: center;
         cursor: pointer;
-        transition: background-color 0.3s, transform 0.3s;
+        transition: all 0.3s ease;
         opacity: 0;
         visibility: hidden;
+        z-index: 1000;
     }
 
     .scroll-to-top.visible {
@@ -193,7 +248,7 @@ style.innerHTML = `
     }
 
     .scroll-to-top:hover {
-        background-color: #16a085;
+        background-color: #333333;
         transform: scale(1.1);
     }
 `;
