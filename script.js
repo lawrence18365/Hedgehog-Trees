@@ -253,3 +253,7 @@ style.innerHTML = `
     }
 `;
 document.head.appendChild(style);
+window.addEventListener('load', function() {
+    const loader = document.querySelector('.loader-container');
+    loader.style.display = 'none';
+});
