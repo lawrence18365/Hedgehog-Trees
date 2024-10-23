@@ -102,7 +102,7 @@ body {
     height: 30px;
     font-size: 13px;
     color: var(--white);
-    position: fixed;
+    position: absolute;
     width: 100%;
     top: 0;
     left: 0;
