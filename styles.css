@@ -84,39 +84,51 @@ body {
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
+/* Update the loader container and content styles */
+.loader-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ffffff;
+    z-index: 9999;
+}
 
-/* Add this to your existing top-bar styles */
-.logo-container {
+.loader-content {
+    position: relative;
+    width: 200px;
+    height: 200px;
+}
+
+/* Add specific styles for the image container */
+.logo-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px; /* Slightly smaller than the outer circle */
+    height: 140px;
+    z-index: 2;
+}
+
+.logo-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Update the spinner styles */
+.spinner-outer {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 180px;
     height: 180px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1002;
-}
-
-.logo-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-.loader-content {
-    position: relative;
-    width: 200px;
-    height: 200px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.spinner-outer {
-    position: absolute;
-    width: 160px;
-    height: 160px;
     border: 2px solid rgba(0, 0, 0, 0.1);
     border-top: 2px solid #000;
     border-radius: 50%;
@@ -125,12 +137,15 @@ body {
 
 .spinner-inner {
     position: absolute;
-    width: 140px;
-    height: 140px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 160px;
+    height: 160px;
     border: 2px solid rgba(0, 0, 0, 0.1);
     border-bottom: 2px solid #000;
     border-radius: 50%;
-    animation: spin-reverse 3s linear infinite;
+    animation: spin-reverse 1.5s linear infinite;
 }
 
 @keyframes spin {
