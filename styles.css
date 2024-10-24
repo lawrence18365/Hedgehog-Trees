@@ -1403,7 +1403,7 @@ body {
 /* Premium Testimonials Section */
 /* Testimonials Section */
 .testimonials-section {
-    padding: 120px 0;
+    padding: 85px 0;
     background: linear-gradient(180deg, var(--white) 0%, var(--gray-50) 100%);
     position: relative;
     overflow: hidden;
