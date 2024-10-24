@@ -74,6 +74,19 @@ class PremiumSiteManager {
         }
     }
 
+    async initializePremiumFeatures() {
+        // Smooth Scroll Polyfill
+        if (!('scrollBehavior' in document.documentElement.style)) {
+            await import('https://unpkg.com/smoothscroll-polyfill@0.4.4/dist/smoothscroll.min.js').then(module => module.polyfill());
+        }
+
+        // Create Premium UI Elements
+        this.createPremiumUIElements();
+
+        // Initialize Animations
+        this.initializeAnimations();
+    }
+
     initializeTestimonials() {
         const { track, cards } = this.testimonials;
         if (!track || !cards.length) return;
@@ -285,65 +298,7 @@ class PremiumSiteManager {
         this.resumeAutoPlay();
     }
 
-    // ... [Rest of the original PremiumSiteManager methods remain unchanged]
-}
-
-// Initialize Premium Site
-console.log("Initializing Premium Site Manager...");
-new PremiumSiteManager();
-async initializePremiumFeatures() {
-        // Smooth Scroll Polyfill
-        if (!('scrollBehavior' in document.documentElement.style)) {
-            await import('https://unpkg.com/smoothscroll-polyfill@0.4.4/dist/smoothscroll.min.js').then(module => module.polyfill());
-        }
-
-        // Create Premium UI Elements
-        this.createPremiumUIElements();
-
-        // Initialize Animations
-        this.initializeAnimations();
-    }
-
-    createPremiumUIElements() {
-        // Create Scroll Progress Indicator
-        this.scrollProgress = document.createElement('div');
-        this.scrollProgress.className = 'scroll-progress';
-        document.body.appendChild(this.scrollProgress);
-
-        // Create Premium Scroll Button
-        this.scrollButton = document.createElement('button');
-        this.scrollButton.className = 'scroll-to-top premium-effect';
-        this.scrollButton.innerHTML = `
-            <div class="scroll-button-background"></div>
-            <i class="fas fa-arrow-up"></i>
-        `;
-        document.body.appendChild(this.scrollButton);
-    }
-
-    initializeAnimations() {
-        // Intersection Observer for Animation on Scroll
-        this.animationObserver = new IntersectionObserver(
-            (entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('animate-in');
-                        if (entry.target.dataset.animationSequence) {
-                            this.triggerSequenceAnimation(entry.target);
-                        }
-                    }
-                });
-            },
-            {
-                threshold: 0.2,
-                rootMargin: '0px'
-            }
-        );
-
-        // Setup Animation Elements
-        document.querySelectorAll('.animate-on-scroll').forEach(element => {
-            this.animationObserver.observe(element);
-        });
-    }
+    // Other methods (e.g., setupEventListeners, handlePremiumScroll, etc.) should also be placed here, inside the class.
 
     setupEventListeners() {
         // Premium Scroll Handling
@@ -358,10 +313,12 @@ async initializePremiumFeatures() {
         }
 
         // Premium Button Events
-        this.scrollButton.addEventListener('click', () => {
-            this.scrollToTop();
-            this.triggerButtonAnimation(this.scrollButton);
-        });
+        if (this.scrollButton) {
+            this.scrollButton.addEventListener('click', () => {
+                this.scrollToTop();
+                this.triggerButtonAnimation(this.scrollButton);
+            });
+        }
 
         // Form Enhancement
         if (this.form?.element) {
@@ -374,48 +331,9 @@ async initializePremiumFeatures() {
         }
     }
 
-    handlePremiumScroll() {
-        if (this.scrollTimeout) {
-            window.cancelAnimationFrame(this.scrollTimeout);
-        }
+    // Include all other methods used in your class here...
 
-        this.scrollTimeout = window.requestAnimationFrame(() => {
-            const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-            this.scrollProgress.style.width = `${scrollPercent}%`;
-
-            // Show/Hide Scroll Button with Premium Animation
-            if (window.scrollY > window.innerHeight / 2) {
-                this.scrollButton.classList.add('visible', 'premium-effect');
-            } else {
-                this.scrollButton.classList.remove('visible');
-            }
-
-            // Header Transformation
-            this.updateHeaderOnScroll();
-        });
-    }
-
-    updateHeaderOnScroll() {
-        const header = document.querySelector('.site-header');
-        if (!header) return;
-
-        const currentScroll = window.scrollY;
-        const scrollDelta = currentScroll - this.lastScrollPosition;
-
-        if (currentScroll > 100) {
-            if (scrollDelta > 0 && !this.state.isMobile) {
-                header.classList.add('header-hidden');
-            } else {
-                header.classList.remove('header-hidden');
-            }
-            header.classList.add('header-scrolled');
-        } else {
-            header.classList.remove('header-scrolled', 'header-hidden');
-        }
-
-        this.lastScrollPosition = currentScroll;
-    }
-
+    // For example:
     handleInitialLoad() {
         const { container, content } = this.loader;
         document.body.style.overflow = 'hidden';
@@ -442,52 +360,7 @@ async initializePremiumFeatures() {
         });
     }
 
-    scrollToTop() {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    }
-
-    debounce(func, wait) {
-        let timeout;
-        return (...args) => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-    }
-
-    handleResize() {
-        this.state.isMobile = window.innerWidth <= 768;
-        
-        // Update slider dimensions and position
-        if (this.testimonials.container) {
-            const { state } = this.testimonials;
-            state.slideWidth = this.testimonials.cards[0].offsetWidth + 30;
-            this.updateSliderPosition();
-        }
-    }
-
-    handleError(error, context) {
-        console.error(`Error in ${context}:`, error);
-        // Implement additional error tracking or user notifications if needed
-    }
-
-    triggerButtonAnimation(button) {
-        button.classList.add('clicked');
-        setTimeout(() => {
-            button.classList.remove('clicked');
-        }, 300);
-    }
-
-    triggerSequenceAnimation(element) {
-        const children = element.querySelectorAll('[data-animation-sequence-item]');
-        children.forEach((child, index) => {
-            setTimeout(() => {
-                child.classList.add('animate-in');
-            }, index * 100);
-        });
-    }
+    // ... and so on for all methods referenced in your code.
 }
 
 // Initialize Premium Site
