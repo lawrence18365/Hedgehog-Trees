@@ -1,6 +1,5 @@
 class PremiumSiteManager {
     constructor() {
-        // Core State
         this.state = {
             isLoading: true,
             isMobile: window.innerWidth <= 768,
@@ -8,18 +7,27 @@ class PremiumSiteManager {
             initialized: false
         };
 
-        // Performance Optimization
-        this.frameRequest = null;
-        this.lastScrollPosition = 0;
-        this.scrollThreshold = 50;
-        this.scrollTimeout = null;
+        // Force remove loader after timeout (failsafe)
+        this.loadingTimeout = setTimeout(() => {
+            this.forceRemoveLoader();
+        }, 5000); // 5 second maximum loading time
 
-        // Wait for DOM to be ready before initializing
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.init());
-        } else {
-            this.init();
+        // Initialize immediately
+        this.init();
+    }
+
+    forceRemoveLoader() {
+        const loader = document.querySelector('.loader-container');
+        if (loader) {
+            loader.style.display = 'none';
         }
+        const content = document.querySelector('.content-container');
+        if (content) {
+            content.style.display = 'block';
+            content.style.opacity = '1';
+        }
+        document.body.style.overflow = '';
+        this.state.isLoading = false;
     }
 
     async init() {
@@ -30,7 +38,7 @@ class PremiumSiteManager {
             this.state.initialized = true;
         } catch (error) {
             console.error('Initialization error:', error);
-            this.handleError(error, 'Initialization');
+            this.forceRemoveLoader(); // Ensure site loads even if there's an error
         }
     }
 
@@ -47,45 +55,27 @@ class PremiumSiteManager {
         if (loader.container || loader.content) {
             this.loader = loader;
         } else {
-            // Create default loader if none exists
             this.createDefaultLoader();
         }
 
-        // Initialize testimonials only if they exist
-        const testimonialContainer = document.querySelector('.testimonial-container');
-        if (testimonialContainer) {
-            this.testimonials = {
-                container: testimonialContainer,
-                track: document.querySelector('.testimonial-track'),
-                cards: Array.from(document.querySelectorAll('.testimonial-card')),
-                controls: {
-                    prev: document.querySelector('.prev-btn'),
-                    next: document.querySelector('.next-btn'),
-                    dots: document.querySelector('.slider-dots')
-                },
-                state: {
-                    currentIndex: 0,
-                    isAnimating: false,
-                    isDragging: false,
-                    startX: 0,
-                    currentTranslate: 0,
-                    previousTranslate: 0,
-                    autoPlayInterval: null,
-                    slideWidth: 0,
-                    totalSlides: 0,
-                    autoPlayDelay: 5000,
-                    transitionDuration: 500
+        // Ensure content container exists
+        if (!document.querySelector('.content-container')) {
+            const contentContainer = document.createElement('div');
+            contentContainer.className = 'content-container';
+            // Move all body content (except loader) into content container
+            Array.from(document.body.children).forEach(child => {
+                if (!child.classList.contains('loader-container') && 
+                    !child.classList.contains('content-container')) {
+                    contentContainer.appendChild(child);
                 }
-            };
-
-            if (this.testimonials.track && this.testimonials.cards.length) {
-                this.initializeTestimonials();
-            }
+            });
+            document.body.appendChild(contentContainer);
+            this.loader.content = contentContainer;
         }
     }
 
     createDefaultLoader() {
-        // Create and append loader container
+        // Create loader container
         const loaderContainer = document.createElement('div');
         loaderContainer.className = 'loader-container';
         loaderContainer.style.cssText = `
@@ -121,31 +111,41 @@ class PremiumSiteManager {
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
             }
+            .content-container {
+                opacity: 0;
+                transition: opacity 0.5s ease;
+            }
         `;
         document.head.appendChild(style);
 
         // Add elements to DOM
         loaderContainer.appendChild(spinner);
-        document.body.appendChild(loaderContainer);
+        document.body.insertBefore(loaderContainer, document.body.firstChild);
 
         // Store loader elements
         this.loader = {
             container: loaderContainer,
-            content: document.querySelector('.content-container'),
-            spinner: spinner
+            spinner: spinner,
+            content: document.querySelector('.content-container')
         };
     }
 
     handleInitialLoad() {
-        if (!this.loader?.container) return;
+        // Clear the failsafe timeout since we're handling the load properly
+        clearTimeout(this.loadingTimeout);
 
-        // Ensure content is initially hidden
+        // Show content immediately if there's no loader
+        if (!this.loader?.container) {
+            this.forceRemoveLoader();
+            return;
+        }
+
+        // Ensure content exists and is ready
         if (this.loader.content) {
-            this.loader.content.style.opacity = '0';
             this.loader.content.style.transition = 'opacity 0.5s ease';
         }
 
-        // Hide loader and show content
+        // Quick loading transition
         setTimeout(() => {
             if (this.loader.container) {
                 this.loader.container.style.opacity = '0';
@@ -156,12 +156,14 @@ class PremiumSiteManager {
                     }
                     if (this.loader.content) {
                         this.loader.content.style.opacity = '1';
+                        this.loader.content.style.display = 'block';
                     }
                     document.body.style.overflow = '';
+                    this.state.isLoading = false;
                     this.triggerInitialAnimations();
                 }, 500);
             }
-        }, 1000);
+        }, 500); // Reduced initial delay
     }
 
     triggerInitialAnimations() {
@@ -176,14 +178,9 @@ class PremiumSiteManager {
     setupEventListeners() {
         window.addEventListener('scroll', this.handlePremiumScroll.bind(this), { passive: true });
         window.addEventListener('resize', this.debounce(this.handleResize.bind(this), 250));
-
-        if ('ontouchstart' in window) {
-            this.setupTouchEvents();
-        }
     }
 
     handlePremiumScroll() {
-        // Basic scroll handling
         const scrollPosition = window.pageYOffset;
         this.state.hasScrolled = true;
         this.lastScrollPosition = scrollPosition;
@@ -204,15 +201,7 @@ class PremiumSiteManager {
             timeout = setTimeout(later, wait);
         };
     }
-
-    handleError(error, context) {
-        console.error(`Error in ${context}:`, error);
-        // You can add more error handling logic here
-    }
 }
 
-// Initialize Premium Site
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("Initializing Premium Site Manager...");
-    window.premiumSite = new PremiumSiteManager();
-});
+// Initialize immediately without waiting for DOMContentLoaded
+window.premiumSite = new PremiumSiteManager();
