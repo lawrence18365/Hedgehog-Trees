@@ -575,3 +575,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     });
+document.addEventListener('DOMContentLoaded', () => {
+    const serviceBoxes = document.querySelectorAll('.service-box');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    serviceBoxes.forEach(box => {
+        observer.observe(box);
+
+        box.addEventListener('mouseenter', () => {
+            box.style.transform = `scale(1.05) rotate(${Math.random() * 2 - 1}deg)`;
+        });
+
+        box.addEventListener('mouseleave', () => {
+            box.style.transform = 'scale(1) rotate(0deg)';
+        });
+
+        const icon = box.querySelector('.service-icon i');
+        box.addEventListener('mousemove', (e) => {
+            const boxRect = box.getBoundingClientRect();
+            const centerX = boxRect.left + boxRect.width / 2;
+            const centerY = boxRect.top + boxRect.height / 2;
+            const angleX = (e.clientY - centerY) / 10;
+            const angleY = (centerX - e.clientX) / 10;
+            icon.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+        });
+
+        box.addEventListener('mouseleave', () => {
+            icon.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+        });
+    });
+
+    // Parallax effect for background circles
+    document.addEventListener('mousemove', (e) => {
+        const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
+        const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
+        document.documentElement.style.setProperty('--move-x', `${moveX}px`);
+        document.documentElement.style.setProperty('--move-y', `${moveY}px`);
+    });
+});
