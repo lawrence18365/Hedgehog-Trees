@@ -315,66 +315,186 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Site Manager
     new SiteManager();
 });
-document.addEventListener('DOMContentLoaded', function() {
-    const header = document.querySelector('.site-header');
-    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
-    const navContainer = document.querySelector('.nav-container');
-    const headerHeight = header.offsetHeight;
-    let lastScroll = 0;
+// Header Controller Class
+class HeaderController {
+    constructor() {
+        this.header = document.querySelector('.site-header');
+        this.mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+        this.navContainer = document.querySelector('.nav-container');
+        this.headerHeight = this.header.offsetHeight;
+        this.lastScroll = 0;
+        this.isMenuOpen = false;
+        this.isScrolling = false;
+        
+        this.init();
+    }
 
-    // Sticky Header Logic
-    window.addEventListener('scroll', () => {
+    init() {
+        this.setupEventListeners();
+        this.setupIntersectionObserver();
+        this.setupScrollThrottle();
+    }
+
+    setupEventListeners() {
+        // Mobile Menu Toggle
+        this.mobileMenuToggle.addEventListener('click', () => this.toggleMobileMenu());
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => this.handleOutsideClick(e));
+
+        // Smooth scroll navigation
+        document.querySelectorAll('.nav-links a, .cta-button').forEach(link => {
+            link.addEventListener('click', (e) => this.handleNavClick(e, link));
+        });
+
+        // Social link effects
+        document.querySelectorAll('.social-link').forEach(link => {
+            link.addEventListener('mouseenter', () => this.addRippleEffect(link));
+        });
+
+        // Handle resize events
+        window.addEventListener('resize', this.debounce(() => this.handleResize(), 250));
+
+        // Handle escape key
+        document.addEventListener('keydown', (e) => this.handleEscapeKey(e));
+    }
+
+    setupIntersectionObserver() {
+        const options = {
+            rootMargin: '-100px 0px 0px 0px',
+            threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+        };
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) {
+                    this.header.classList.add('sticky');
+                } else {
+                    this.header.classList.remove('sticky');
+                }
+            });
+        }, options);
+
+        // Observe a sentinel element at the top of the page
+        const sentinel = document.createElement('div');
+        sentinel.classList.add('scroll-sentinel');
+        document.body.prepend(sentinel);
+        observer.observe(sentinel);
+    }
+
+    setupScrollThrottle() {
+        let ticking = false;
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    this.handleScroll();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+    }
+
+    handleScroll() {
         const currentScroll = window.pageYOffset;
         
-        if (currentScroll > headerHeight) {
-            header.classList.add('sticky');
-            if (currentScroll > lastScroll) {
-                header.style.transform = 'translateY(-100%)';
+        if (currentScroll > this.headerHeight) {
+            if (currentScroll > this.lastScroll && currentScroll > this.headerHeight) {
+                // Scrolling down
+                this.header.style.transform = 'translateY(-100%)';
             } else {
-                header.style.transform = 'translateY(0)';
+                // Scrolling up
+                this.header.style.transform = 'translateY(0)';
             }
         } else {
-            header.classList.remove('sticky');
+            this.header.classList.remove('sticky');
         }
         
-        lastScroll = currentScroll;
-    });
+        this.lastScroll = currentScroll;
+    }
 
-    // Mobile Menu Logic
-    mobileMenuToggle.addEventListener('click', () => {
-        navContainer.classList.toggle('active');
-        mobileMenuToggle.classList.toggle('active');
-    });
+    toggleMobileMenu() {
+        this.isMenuOpen = !this.isMenuOpen;
+        this.navContainer.classList.toggle('active');
+        this.mobileMenuToggle.classList.toggle('active');
+        document.body.style.overflow = this.isMenuOpen ? 'hidden' : '';
+    }
 
-    // Close mobile menu when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!navContainer.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
-            navContainer.classList.remove('active');
-            mobileMenuToggle.classList.remove('active');
+    handleOutsideClick(e) {
+        if (this.isMenuOpen && !this.navContainer.contains(e.target) && !this.mobileMenuToggle.contains(e.target)) {
+            this.toggleMobileMenu();
         }
-    });
+    }
 
-    // Smooth scrolling for navigation links
-    document.querySelectorAll('.nav-links a, .cta-button').forEach(link => {
-        link.addEventListener('click', (e) => {
-            const target = document.querySelector(link.getAttribute('href'));
-            if (target) {
-                e.preventDefault();
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                navContainer.classList.remove('active');
-                mobileMenuToggle.classList.remove('active');
-            }
-        });
-    });
-
-    // Add hover effects to social links
-    document.querySelectorAll('.social-link').forEach(link => {
-        link.addEventListener('mouseenter', (e) => {
-            const ripple = document.createElement('div');
-            ripple.classList.add('ripple');
-            link.appendChild(ripple);
+    handleNavClick(e, link) {
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+            e.preventDefault();
+            const headerOffset = this.header.offsetHeight;
+            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
             
-            setTimeout(() => ripple.remove(), 1000);
-        });
+            window.scrollTo({
+                top: targetPosition,
+                behavior: 'smooth'
+            });
+
+            if (this.isMenuOpen) {
+                this.toggleMobileMenu();
+            }
+        }
+    }
+
+    addRippleEffect(link) {
+        const ripple = document.createElement('div');
+        ripple.classList.add('ripple');
+        link.appendChild(ripple);
+        
+        ripple.addEventListener('animationend', () => ripple.remove());
+    }
+
+    handleResize() {
+        if (window.innerWidth > 768 && this.isMenuOpen) {
+            this.toggleMobileMenu();
+        }
+        this.headerHeight = this.header.offsetHeight;
+    }
+
+    handleEscapeKey(e) {
+        if (e.key === 'Escape' && this.isMenuOpen) {
+            this.toggleMobileMenu();
+        }
+    }
+
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+}
+
+// Initialize Header
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize loader
+    const loader = document.querySelector('.loader-container');
+    const content = document.querySelector('.content-container');
+    
+    // Handle page load
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+                content.style.opacity = '1';
+                // Initialize header controller
+                new HeaderController();
+            }, 500);
+        }, 1500);
     });
 });
