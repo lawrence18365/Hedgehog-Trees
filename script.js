@@ -29,9 +29,9 @@ class PremiumSiteManager {
     async init() {
         try {
             await this.initializeComponents();
+            this.initializeTestimonials();
             this.setupEventListeners();
             this.handleInitialLoad();
-            this.initializeTestimonials();
             this.state.initialized = true;
         } catch (error) {
             console.error('Initialization error:', error);
@@ -89,13 +89,21 @@ class PremiumSiteManager {
         // Clone first and last slides
         const firstClone = cards[0].cloneNode(true);
         const lastClone = cards[cards.length - 1].cloneNode(true);
-        
+
         track.appendChild(firstClone);
         track.prepend(lastClone);
 
         // Update cards array and set initial state
         this.testimonials.cards = Array.from(track.querySelectorAll('.testimonial-card'));
-        this.testimonials.cardWidth = cards[0].offsetWidth + 30;
+
+        // Get the gap between cards from CSS
+        const trackStyle = window.getComputedStyle(track);
+        const gap = parseFloat(trackStyle.gap) || 0;
+
+        // Calculate the card width including the gap
+        this.testimonials.cardWidth = this.testimonials.cards[0].offsetWidth + gap;
+
+        // Set totalSlides to the original number of slides
         this.testimonials.totalSlides = cards.length;
 
         // Set initial position
@@ -162,12 +170,12 @@ class PremiumSiteManager {
         if (nextBtn) nextBtn.addEventListener('click', () => this.slide('next'));
         if (track) {
             track.addEventListener('transitionend', () => this.handleTransitionEnd());
-            
+
             // Touch events
             track.addEventListener('touchstart', e => this.handleTouchStart(e));
             track.addEventListener('touchmove', e => this.handleTouchMove(e));
             track.addEventListener('touchend', () => this.handleTouchEnd());
-            
+
             // Mouse events
             track.addEventListener('mousedown', e => this.handleTouchStart(e));
             track.addEventListener('mousemove', e => this.handleTouchMove(e));
@@ -179,7 +187,7 @@ class PremiumSiteManager {
     slide(direction) {
         if (this.testimonials.isAnimating) return;
         this.testimonials.isAnimating = true;
-        
+
         this.testimonials.currentIndex += direction === 'next' ? 1 : -1;
         this.updateSliderPosition();
     }
@@ -206,7 +214,7 @@ class PremiumSiteManager {
     handleTouchMove(e) {
         if (!this.testimonials.touchStartX) return;
         e.preventDefault();
-        
+
         this.testimonials.touchCurrentX = e.type === 'mousemove' ? e.pageX : e.touches[0].clientX;
         const diff = this.testimonials.touchCurrentX - this.testimonials.touchStartX;
         const translate = this.testimonials.currentTranslate + diff;
@@ -214,7 +222,7 @@ class PremiumSiteManager {
     }
 
     handleTouchEnd() {
-        if (!this.testimonials.touchStartX || !this.testimonials.touchCurrentX) return;
+        if (this.testimonials.touchStartX === null || this.testimonials.touchCurrentX === null) return;
 
         const diff = this.testimonials.touchCurrentX - this.testimonials.touchStartX;
         if (Math.abs(diff) > this.testimonials.cardWidth / 3) {
@@ -230,7 +238,9 @@ class PremiumSiteManager {
     handleResize() {
         this.state.isMobile = window.innerWidth <= 768;
         if (this.testimonials.cards.length) {
-            this.testimonials.cardWidth = this.testimonials.cards[0].offsetWidth + 30;
+            const trackStyle = window.getComputedStyle(this.testimonials.track);
+            const gap = parseFloat(trackStyle.gap) || 0;
+            this.testimonials.cardWidth = this.testimonials.cards[0].offsetWidth + gap;
             this.updateSliderPosition(false);
         }
     }
@@ -284,7 +294,7 @@ class PremiumSiteManager {
 
     handleInitialLoad() {
         clearTimeout(this.loadingTimeout);
-        
+
         if (!this.loader?.container) {
             this.forceRemoveLoader();
             return;
@@ -297,7 +307,7 @@ class PremiumSiteManager {
         setTimeout(() => {
             if (this.loader.container) {
                 this.loader.container.style.opacity = '0';
-                
+
                 setTimeout(() => {
                     if (this.loader.container) {
                         this.loader.container.style.display = 'none';
@@ -316,13 +326,13 @@ class PremiumSiteManager {
     forceRemoveLoader() {
         const loader = document.querySelector('.loader-container');
         if (loader) loader.style.display = 'none';
-        
+
         const content = document.querySelector('.content-container');
         if (content) {
             content.style.display = 'block';
             content.style.opacity = '1';
         }
-        
+
         document.body.style.overflow = '';
         this.state.isLoading = false;
     }
