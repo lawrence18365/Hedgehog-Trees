@@ -1,12 +1,13 @@
 class PremiumSiteManager {
     constructor() {
+        // Core State
         this.state = {
             isLoading: true,
             isMobile: window.innerWidth <= 768,
-            initialized: false,
-            resourcesLoaded: false
+            initialized: false
         };
 
+        // Testimonial State
         this.testimonials = {
             container: null,
             track: null,
@@ -20,9 +21,8 @@ class PremiumSiteManager {
             currentTranslate: 0
         };
 
-        this.resourcesToLoad = 0;
-        this.resourcesLoaded = 0;
-        this.loadingTimeout = setTimeout(() => this.forceRemoveLoader(), 10000);
+        // Initialize with 5 second maximum loading time
+        this.loadingTimeout = setTimeout(() => this.forceRemoveLoader(), 5000);
         this.init();
     }
 
@@ -30,7 +30,7 @@ class PremiumSiteManager {
         try {
             await this.initializeComponents();
             this.setupEventListeners();
-            await this.waitForResources();
+            this.handleInitialLoad();
             this.initializeTestimonials();
             this.state.initialized = true;
         } catch (error) {
@@ -39,66 +39,8 @@ class PremiumSiteManager {
         }
     }
 
-    async waitForResources() {
-        return new Promise((resolve) => {
-            const images = Array.from(document.getElementsByTagName('img'));
-            const scripts = Array.from(document.getElementsByTagName('script'));
-            const links = Array.from(document.getElementsByTagName('link')).filter(
-                link => link.rel === 'stylesheet'
-            );
-
-            this.resourcesToLoad = images.length + scripts.length + links.length;
-
-            if (this.resourcesToLoad === 0) {
-                this.state.resourcesLoaded = true;
-                resolve();
-                return;
-            }
-
-            const resourceLoaded = () => {
-                this.resourcesLoaded++;
-                if (this.resourcesLoaded >= this.resourcesToLoad) {
-                    this.state.resourcesLoaded = true;
-                    resolve();
-                }
-            };
-
-            images.forEach(img => {
-                if (img.complete) resourceLoaded();
-                else {
-                    img.addEventListener('load', resourceLoaded);
-                    img.addEventListener('error', resourceLoaded);
-                }
-            });
-
-            scripts.forEach(script => {
-                if (script.readyState) {
-                    if (script.readyState === 'complete' || script.readyState === 'loaded') {
-                        resourceLoaded();
-                    } else {
-                        script.onreadystatechange = resourceLoaded;
-                    }
-                } else {
-                    if (script.hasAttribute('src')) {
-                        script.addEventListener('load', resourceLoaded);
-                        script.addEventListener('error', resourceLoaded);
-                    } else {
-                        resourceLoaded();
-                    }
-                }
-            });
-
-            links.forEach(link => {
-                if (link.sheet) resourceLoaded();
-                else {
-                    link.addEventListener('load', resourceLoaded);
-                    link.addEventListener('error', resourceLoaded);
-                }
-            });
-        });
-    }
-
     async initializeComponents() {
+        // Initialize loader
         const loader = {
             container: document.querySelector('.loader-container'),
             content: document.querySelector('.content-container'),
@@ -111,10 +53,10 @@ class PremiumSiteManager {
             this.createDefaultLoader();
         }
 
+        // Ensure content container exists
         if (!document.querySelector('.content-container')) {
             const contentContainer = document.createElement('div');
             contentContainer.className = 'content-container';
-            contentContainer.style.opacity = '0';
             Array.from(document.body.children).forEach(child => {
                 if (!child.classList.contains('loader-container') && 
                     !child.classList.contains('content-container')) {
@@ -127,6 +69,7 @@ class PremiumSiteManager {
     }
 
     initializeTestimonials() {
+        // Get testimonial elements
         const container = document.querySelector('.testimonial-container');
         if (!container) return;
 
@@ -143,16 +86,19 @@ class PremiumSiteManager {
         const { track, cards } = this.testimonials;
         if (!track || !cards.length) return;
 
+        // Clone first and last slides
         const firstClone = cards[0].cloneNode(true);
         const lastClone = cards[cards.length - 1].cloneNode(true);
         
         track.appendChild(firstClone);
         track.prepend(lastClone);
 
+        // Update cards array and set initial state
         this.testimonials.cards = Array.from(track.querySelectorAll('.testimonial-card'));
         this.testimonials.cardWidth = cards[0].offsetWidth + 30;
         this.testimonials.totalSlides = cards.length;
 
+        // Set initial position
         this.updateSliderPosition(false);
         this.createDots();
     }
@@ -207,16 +153,22 @@ class PremiumSiteManager {
     }
 
     setupEventListeners() {
+        // Core event listeners
         window.addEventListener('resize', this.debounce(this.handleResize.bind(this), 250));
 
+        // Testimonial event listeners
         const { prevBtn, nextBtn, track } = this.testimonials;
         if (prevBtn) prevBtn.addEventListener('click', () => this.slide('prev'));
         if (nextBtn) nextBtn.addEventListener('click', () => this.slide('next'));
         if (track) {
             track.addEventListener('transitionend', () => this.handleTransitionEnd());
+            
+            // Touch events
             track.addEventListener('touchstart', e => this.handleTouchStart(e));
             track.addEventListener('touchmove', e => this.handleTouchMove(e));
             track.addEventListener('touchend', () => this.handleTouchEnd());
+            
+            // Mouse events
             track.addEventListener('mousedown', e => this.handleTouchStart(e));
             track.addEventListener('mousemove', e => this.handleTouchMove(e));
             track.addEventListener('mouseup', () => this.handleTouchEnd());
@@ -227,6 +179,7 @@ class PremiumSiteManager {
     slide(direction) {
         if (this.testimonials.isAnimating) return;
         this.testimonials.isAnimating = true;
+        
         this.testimonials.currentIndex += direction === 'next' ? 1 : -1;
         this.updateSliderPosition();
     }
@@ -316,9 +269,6 @@ class PremiumSiteManager {
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
             }
-            .content-container {
-                transition: opacity 0.5s ease;
-            }
         `;
         document.head.appendChild(style);
 
@@ -333,8 +283,6 @@ class PremiumSiteManager {
     }
 
     handleInitialLoad() {
-        if (!this.state.resourcesLoaded || !this.state.initialized) return;
-        
         clearTimeout(this.loadingTimeout);
         
         if (!this.loader?.container) {
@@ -346,7 +294,7 @@ class PremiumSiteManager {
             this.loader.content.style.transition = 'opacity 0.5s ease';
         }
 
-        window.requestAnimationFrame(() => {
+        setTimeout(() => {
             if (this.loader.container) {
                 this.loader.container.style.opacity = '0';
                 
@@ -355,15 +303,14 @@ class PremiumSiteManager {
                         this.loader.container.style.display = 'none';
                     }
                     if (this.loader.content) {
-                        this.loader.content.style.display = 'block';
-                        void this.loader.content.offsetWidth;
                         this.loader.content.style.opacity = '1';
+                        this.loader.content.style.display = 'block';
                     }
                     document.body.style.overflow = '';
                     this.state.isLoading = false;
                 }, 500);
             }
-        });
+        }, 500);
     }
 
     forceRemoveLoader() {
@@ -387,36 +334,145 @@ class PremiumSiteManager {
             timeout = setTimeout(() => func.apply(this, args), wait);
         };
     }
+}
 
-    static initialize() {
-        const siteManager = new PremiumSiteManager();
+// Initialize site
+window.addEventListener('DOMContentLoaded', () => {
+    window.premiumSite = new PremiumSiteManager();
+});
+class TestimonialSlider {
+    constructor() {
+        this.container = document.querySelector('.testimonial-container');
+        this.track = document.querySelector('.testimonial-track');
+        this.cards = Array.from(document.querySelectorAll('.testimonial-card'));
+        this.prevBtn = document.querySelector('.prev-btn');
+        this.nextBtn = document.querySelector('.next-btn');
+        this.dotsContainer = document.querySelector('.slider-dots');
         
-        const domReady = new Promise(resolve => {
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', resolve);
-            } else {
-                resolve();
-            }
-        });
+        this.currentIndex = 1;
+        this.cardWidth = 0;
+        this.isAnimating = false;
 
-        const windowReady = new Promise(resolve => {
-            if (document.readyState === 'complete') {
-                resolve();
-            } else {
-                window.addEventListener('load', resolve);
-            }
-        });
+        this.init();
+    }
 
-        Promise.all([domReady, windowReady]).then(() => {
-            setTimeout(() => {
-                if (siteManager.state.resourcesLoaded) {
-                    siteManager.handleInitialLoad();
-                }
-            }, 500);
-        });
+    init() {
+        if (!this.track || !this.cards.length) return;
 
-        return siteManager;
+        // Clone first and last slides
+        const firstClone = this.cards[0].cloneNode(true);
+        const lastClone = this.cards[this.cards.length - 1].cloneNode(true);
+        
+        this.track.appendChild(firstClone);
+        this.track.prepend(lastClone);
+        
+        // Update cards array with clones
+        this.cards = Array.from(this.track.querySelectorAll('.testimonial-card'));
+        
+        // Calculate card width including gap
+        this.cardWidth = this.cards[0].offsetWidth + 30;
+        this.totalSlides = this.cards.length - 2; // Subtract clones
+
+        // Set initial position
+        this.updatePosition(false);
+        this.createDots();
+        this.setupEventListeners();
+
+        // Handle resize
+        window.addEventListener('resize', this.debounce(() => {
+            this.cardWidth = this.cards[0].offsetWidth + 30;
+            this.updatePosition(false);
+        }, 250));
+    }
+
+    createDots() {
+        if (!this.dotsContainer) return;
+        
+        for (let i = 0; i < this.totalSlides; i++) {
+            const dot = document.createElement('button');
+            dot.className = 'slider-dot';
+            dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+            dot.addEventListener('click', () => this.goToSlide(i + 1));
+            this.dotsContainer.appendChild(dot);
+        }
+        this.updateDots();
+    }
+
+    setupEventListeners() {
+        if (this.prevBtn) {
+            this.prevBtn.addEventListener('click', () => this.slide('prev'));
+        }
+        if (this.nextBtn) {
+            this.nextBtn.addEventListener('click', () => this.slide('next'));
+        }
+
+        this.track.addEventListener('transitionend', () => this.handleTransitionEnd());
+    }
+
+    slide(direction) {
+        if (this.isAnimating) return;
+        this.isAnimating = true;
+        
+        this.currentIndex += direction === 'next' ? 1 : -1;
+        this.updatePosition();
+    }
+
+    updatePosition(withTransition = true) {
+        if (!this.track) return;
+        
+        this.track.style.transition = withTransition ? 'transform 0.5s ease-in-out' : 'none';
+        this.track.style.transform = `translateX(${-this.currentIndex * this.cardWidth}px)`;
+        
+        if (withTransition) {
+            this.updateDots();
+        }
+    }
+
+    handleTransitionEnd() {
+        this.isAnimating = false;
+
+        // Handle infinite scroll
+        if (this.currentIndex === 0) {
+            this.currentIndex = this.totalSlides;
+            this.updatePosition(false);
+        } else if (this.currentIndex === this.totalSlides + 1) {
+            this.currentIndex = 1;
+            this.updatePosition(false);
+        }
+    }
+
+    goToSlide(index) {
+        if (this.isAnimating) return;
+        this.isAnimating = true;
+        this.currentIndex = index;
+        this.updatePosition();
+    }
+
+    updateDots() {
+        if (!this.dotsContainer) return;
+
+        const dots = Array.from(this.dotsContainer.children);
+        const actualIndex = this.currentIndex === 0 
+            ? this.totalSlides - 1 
+            : this.currentIndex === this.totalSlides + 1 
+                ? 0 
+                : this.currentIndex - 1;
+
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === actualIndex);
+        });
+    }
+
+    debounce(func, wait) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
     }
 }
 
-window.premiumSite = PremiumSiteManager.initialize();
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    new TestimonialSlider();
+});
