@@ -205,3 +205,49 @@ class PremiumSiteManager {
 
 // Initialize immediately without waiting for DOMContentLoaded
 window.premiumSite = new PremiumSiteManager();
+// Stat Counter Animation
+function animateValue(element, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        element.textContent = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// Intersection Observer for stats animation
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const statElements = entry.target.querySelectorAll('.stat-number');
+            statElements.forEach(stat => {
+                const endValue = parseInt(stat.getAttribute('data-count'));
+                animateValue(stat, 0, endValue, 2000);
+            });
+            observer.unobserve(entry.target);
+        }
+    });
+}, {
+    threshold: 0.5
+});
+
+// Start observing stats container
+document.querySelector('.service-stats')?.forEach(stats => {
+    observer.observe(stats);
+});
+
+// Map interaction enhancements
+const mapContainer = document.querySelector('.map-frame');
+if (mapContainer) {
+    mapContainer.addEventListener('mouseenter', () => {
+        mapContainer.style.transform = 'scale(1.02)';
+    });
+    
+    mapContainer.addEventListener('mouseleave', () => {
+        mapContainer.style.transform = 'scale(1)';
+    });
+}
