@@ -1920,7 +1920,7 @@ body {
 
 /* Our Work Section Styles */
   .portfolio-section {
-            padding: var(--cta-padding) 0;
+            padding: 100px 0;
             background: var(--background-light);
             position: relative;
             overflow: hidden;
