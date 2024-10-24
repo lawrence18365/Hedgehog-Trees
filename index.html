@@ -20,33 +20,63 @@
   </div>
 </div>
 <div class="content-container">
+    <header id="header" class="site-header">
+    <!-- Top Bar -->
     <div class="top-bar">
         <div class="container">
             <div class="contact-info">
-                <span><i class="fas fa-phone"></i> (123) 456-7890</span>
-                <span><i class="fas fa-envelope"></i> info@hedgehogtrees.com</span>
+                <a href="tel:(123)456-7890" class="contact-link" data-tooltip="Call us now">
+                    <span class="icon-wrapper">
+                        <i class="fas fa-phone-alt"></i>
+                    </span>
+                    <span class="contact-text">(123) 456-7890</span>
+                </a>
+                <a href="mailto:info@hedgehogtrees.com" class="contact-link" data-tooltip="Email us">
+                    <span class="icon-wrapper">
+                        <i class="fas fa-envelope"></i>
+                    </span>
+                    <span class="contact-text">info@hedgehogtrees.com</span>
+                </a>
             </div>
             <div class="social-links">
-                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <div class="social-text">Connect With Us</div>
+                <a href="#" class="social-link" aria-label="Facebook" data-tooltip="Facebook">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="social-link" aria-label="Instagram" data-tooltip="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
             </div>
         </div>
     </div>
 
-    <header id="header">
+    <!-- Main Navigation -->
+    <nav class="main-nav">
         <div class="container">
-            <img src="https://i.postimg.cc/x1znzdVz/Untitled-design-14-modified.png" alt="Hedgehog Trees & Trimming Logo" class="logo">
-            <nav>
-                <ul>
+            <div class="logo-container">
+                <a href="/" class="logo-link">
+                    <img src="https://i.postimg.cc/x1znzdVz/Untitled-design-14-modified.png" alt="Hedgehog Trees & Trimming Logo" class="logo">
+                </a>
+            </div>
+            
+            <button class="mobile-menu-toggle" aria-label="Toggle Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="nav-container">
+                <ul class="nav-links">
                     <li><a href="#about">About Us</a></li>
                     <li><a href="#services">Services</a></li>
                     <li><a href="#testimonials">Testimonials</a></li>
                     <li><a href="#contact">Contact Us</a></li>
                 </ul>
-            </nav>
-            <a href="#contact" class="cta-button">Get a Free Quote</a>
+                <a href="#contact" class="cta-button">Get a Free Quote</a>
+            </div>
         </div>
-    </header>
+    </nav>
+</header>
 
     <section id="hero">
         <div class="hero-content">
