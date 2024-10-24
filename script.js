@@ -24,16 +24,15 @@ class PremiumSiteManager {
             // Initialize Components
             await this.initializeComponents();
             this.setupEventListeners();
-            this.setupIntersectionObservers();
             this.setupScrollEffects();
-            
+
             // Start Loading Sequence
             this.handleInitialLoad();
-            
+
             this.state.initialized = true;
         } catch (error) {
             console.error('Initialization error:', error);
-            this.handleInitializationError();
+            this.handleError(error, 'Initialization');
         }
     }
 
@@ -70,7 +69,7 @@ class PremiumSiteManager {
         // Form Components
         this.form = {
             element: document.getElementById('contact-form'),
-            inputs: document.querySelectorAll('input, textarea'),
+            inputs: document.querySelectorAll('#contact-form input, #contact-form textarea'),
             submitButton: document.querySelector('#contact-form button[type="submit"]')
         };
 
@@ -81,7 +80,7 @@ class PremiumSiteManager {
     async initializePremiumFeatures() {
         // Smooth Scroll Polyfill
         if (!('scrollBehavior' in document.documentElement.style)) {
-            await import('smoothscroll-polyfill').then(module => module.polyfill());
+            await import('https://unpkg.com/smoothscroll-polyfill@0.4.4/dist/smoothscroll.min.js').then(module => module.polyfill());
         }
 
         // Create Premium UI Elements
@@ -106,24 +105,8 @@ class PremiumSiteManager {
         `;
         document.body.appendChild(this.scrollButton);
 
-        // Create Loading Overlay
-        this.createLoadingOverlay();
-    }
-
-    createLoadingOverlay() {
-        const overlay = document.createElement('div');
-        overlay.className = 'premium-loading-overlay';
-        overlay.innerHTML = `
-            <div class="loading-content">
-                <svg class="premium-spinner" viewBox="0 0 50 50">
-                    <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
-                </svg>
-                <div class="loading-text">
-                    <span>L</span><span>o</span><span>a</span><span>d</span><span>i</span><span>n</span><span>g</span>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(overlay);
+        // Create Loading Overlay (if needed)
+        // You can implement a loading overlay if required
     }
 
     initializeAnimations() {
@@ -154,10 +137,10 @@ class PremiumSiteManager {
     setupEventListeners() {
         // Premium Scroll Handling
         window.addEventListener('scroll', this.handlePremiumScroll.bind(this), { passive: true });
-        
+
         // Responsive Design Handling
         window.addEventListener('resize', this.debounce(this.handleResize.bind(this), 250));
-        
+
         // Touch Events for Mobile
         if ('ontouchstart' in window) {
             this.setupTouchEvents();
@@ -165,7 +148,7 @@ class PremiumSiteManager {
 
         // Premium Button Events
         this.scrollButton.addEventListener('click', () => {
-            this.smoothScrollTop();
+            this.scrollToTop();
             this.triggerButtonAnimation(this.scrollButton);
         });
 
@@ -181,15 +164,17 @@ class PremiumSiteManager {
     }
 
     setupTouchEvents() {
-        const touchElements = [this.testimonials.track, document.body];
-        
-        touchElements.forEach(element => {
-            if (!element) return;
+        const { track } = this.testimonials;
+        if (!track) return;
 
-            element.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: true });
-            element.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
-            element.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: true });
-        });
+        // Add Event Listeners for Touch Events
+        track.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true });
+        track.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+        track.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });
+        track.addEventListener('mousedown', this.handleTouchStart.bind(this));
+        track.addEventListener('mousemove', this.handleTouchMove.bind(this));
+        track.addEventListener('mouseup', this.handleTouchEnd.bind(this));
+        track.addEventListener('mouseleave', this.handleTouchEnd.bind(this));
     }
 
     setupEnhancedForm() {
@@ -201,13 +186,13 @@ class PremiumSiteManager {
         });
 
         // Form Submission
-        this.form.element.addEventListener('submit', (e) => this.handleEnhancedSubmit(e));
+        this.form.element.addEventListener('submit', (e) => this.handleFormSubmit(e));
     }
 
     setupTestimonialControls() {
-        const { controls, state } = this.testimonials;
+        const { controls } = this.testimonials;
 
-        // Enhanced Controls
+        // Controls Event Listeners
         if (controls.prev) controls.prev.addEventListener('click', () => this.previousSlide());
         if (controls.next) controls.next.addEventListener('click', () => this.nextSlide());
 
@@ -217,7 +202,12 @@ class PremiumSiteManager {
 
         // Initialize Dots
         this.createEnhancedDots();
-    }// Premium Animation Methods
+
+        // Initialize Slider
+        this.setupTestimonialSlider();
+    }
+
+    // Scroll Handling Methods
     handlePremiumScroll() {
         if (this.scrollTimeout) {
             window.cancelAnimationFrame(this.scrollTimeout);
@@ -226,7 +216,7 @@ class PremiumSiteManager {
         this.scrollTimeout = window.requestAnimationFrame(() => {
             const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
             this.scrollProgress.style.width = `${scrollPercent}%`;
-            
+
             // Show/Hide Scroll Button with Premium Animation
             if (window.scrollY > window.innerHeight / 2) {
                 this.scrollButton.classList.add('visible', 'premium-effect');
@@ -234,20 +224,8 @@ class PremiumSiteManager {
                 this.scrollButton.classList.remove('visible');
             }
 
-            // Parallax Effects
-            this.updateParallaxElements();
-            
             // Header Transformation
             this.updateHeaderOnScroll();
-        });
-    }
-
-    updateParallaxElements() {
-        const parallaxElements = document.querySelectorAll('[data-parallax]');
-        parallaxElements.forEach(element => {
-            const speed = element.dataset.parallax || 0.5;
-            const yPos = -(window.scrollY * speed);
-            element.style.transform = `translate3d(0, ${yPos}px, 0)`;
         });
     }
 
@@ -257,7 +235,7 @@ class PremiumSiteManager {
 
         const currentScroll = window.scrollY;
         const scrollDelta = currentScroll - this.lastScrollPosition;
-        
+
         if (currentScroll > 100) {
             if (scrollDelta > 0 && !this.state.isMobile) {
                 header.classList.add('header-hidden');
@@ -272,125 +250,47 @@ class PremiumSiteManager {
         this.lastScrollPosition = currentScroll;
     }
 
-    // Enhanced Testimonial Slider
-    setupTestimonialSlider() {
-        if (!this.testimonials.track) return;
-
-        this.testimonials.state = {
-            ...this.testimonials.state,
-            slideWidth: this.testimonials.cards[0].offsetWidth,
-            totalSlides: this.testimonials.cards.length,
-            autoPlayDelay: 5000,
-            transitionDuration: 500
-        };
-
-        // Initialize Slider Position
-        this.updateSliderPosition(true);
-        
-        // Start Auto-play
-        this.startAutoPlay();
-
-        // Add Premium Touch Interactions
-        this.setupPremiumTouchInteractions();
-    }
-
-    setupPremiumTouchInteractions() {
-        const { track } = this.testimonials;
-        let touchStartTime;
-        let touchEndTime;
-
-        const handleTouchStart = (e) => {
-            touchStartTime = Date.now();
-            this.testimonials.state.isDragging = true;
-            this.testimonials.state.startX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
-            track.style.transition = 'none';
-            this.pauseAutoPlay();
-        };
-
-        const handleTouchMove = (e) => {
-            if (!this.testimonials.state.isDragging) return;
-            
-            e.preventDefault();
-            const currentPosition = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
-            const diff = currentPosition - this.testimonials.state.startX;
-            
-            const translate = this.testimonials.state.currentTranslate + diff;
-            this.setSliderPosition(translate);
-        };
-
-        const handleTouchEnd = () => {
-            touchEndTime = Date.now();
-            const touchDuration = touchEndTime - touchStartTime;
-            
-            this.testimonials.state.isDragging = false;
-            track.style.transition = `transform ${this.testimonials.state.transitionDuration}ms cubic-bezier(0.4, 0, 0.2, 1)`;
-            
-            this.snapToNearestSlide(touchDuration);
-            this.resumeAutoPlay();
-        };
-
-        // Add Event Listeners with Passive Option for Better Performance
-        track.addEventListener('touchstart', handleTouchStart, { passive: true });
-        track.addEventListener('touchmove', handleTouchMove, { passive: false });
-        track.addEventListener('touchend', handleTouchEnd, { passive: true });
-        track.addEventListener('mousedown', handleTouchStart, { passive: true });
-        track.addEventListener('mousemove', handleTouchMove, { passive: false });
-        track.addEventListener('mouseup', handleTouchEnd, { passive: true });
-        track.addEventListener('mouseleave', handleTouchEnd, { passive: true });
-    }
-
-    snapToNearestSlide(touchDuration) {
-        const { currentTranslate, slideWidth } = this.testimonials.state;
-        const movePercentage = Math.abs(currentTranslate - this.testimonials.state.previousTranslate) / slideWidth;
-        
-        let targetIndex = this.testimonials.state.currentIndex;
-        
-        if (movePercentage > 0.2 || touchDuration < 300) {
-            if (currentTranslate < this.testimonials.state.previousTranslate) {
-                targetIndex = Math.min(targetIndex + 1, this.testimonials.cards.length - 1);
-            } else {
-                targetIndex = Math.max(targetIndex - 1, 0);
-            }
-        }
-
-        this.goToSlide(targetIndex);
-    }
-
-    // Premium Form Handling
-    setupEnhancedForm() {
-        if (!this.form.element) return;
-
-        // Add floating labels
-        this.form.inputs.forEach(input => {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'form-field-wrapper';
-            
-            const label = document.createElement('label');
-            label.textContent = input.placeholder;
-            input.placeholder = '';
-            
-            input.parentNode.insertBefore(wrapper, input);
-            wrapper.appendChild(input);
-            wrapper.appendChild(label);
+    scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
         });
+    }
 
-        // Enhanced validation
-        this.form.element.addEventListener('submit', this.handleFormSubmit.bind(this));
+    // Form Handling Methods
+    handleInputFocus(input) {
+        input.parentNode.classList.add('focused');
+    }
+
+    handleInputBlur(input) {
+        if (!input.value.trim()) {
+            input.parentNode.classList.remove('focused');
+        }
+        this.handleInputValidation(input);
+    }
+
+    handleInputValidation(input) {
+        if (input.validity.valid) {
+            input.classList.remove('invalid');
+        } else {
+            input.classList.add('invalid');
+        }
     }
 
     async handleFormSubmit(e) {
         e.preventDefault();
-        
+
         if (!this.validateForm()) return;
 
         this.showLoadingState();
-        
+
         try {
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 1500));
-            
+
             this.showSuccessMessage();
             this.form.element.reset();
+            this.form.inputs.forEach(input => input.parentNode.classList.remove('focused'));
         } catch (error) {
             this.showErrorMessage();
         } finally {
@@ -398,31 +298,171 @@ class PremiumSiteManager {
         }
     }
 
-    // Premium Loading Sequence
-    async handleInitialLoad() {
-        document.body.style.overflow = 'hidden';
-        
-        // Preload critical images
-        await this.preloadCriticalImages();
+    validateForm() {
+        let isValid = true;
 
-        // Animate loader out
-        const loader = document.querySelector('.loader-container');
-        const content = document.querySelector('.content-container');
+        this.form.inputs.forEach(input => {
+            if (!input.checkValidity()) {
+                input.classList.add('invalid');
+                isValid = false;
+            } else {
+                input.classList.remove('invalid');
+            }
+        });
+
+        return isValid;
+    }
+
+    showLoadingState() {
+        this.form.submitButton.disabled = true;
+        this.form.submitButton.classList.add('loading');
+    }
+
+    hideLoadingState() {
+        this.form.submitButton.disabled = false;
+        this.form.submitButton.classList.remove('loading');
+    }
+
+    showSuccessMessage() {
+        alert('Form submitted successfully!');
+    }
+
+    showErrorMessage() {
+        alert('An error occurred. Please try again later.');
+    }
+
+    // Testimonial Slider Methods
+    setupTestimonialSlider() {
+        const { state } = this.testimonials;
+        state.slideWidth = this.testimonials.cards[0].offsetWidth;
+        state.totalSlides = this.testimonials.cards.length;
+        state.autoPlayDelay = 5000;
+        state.transitionDuration = 500;
+
+        // Initialize Slider Position
+        this.updateSliderPosition();
+
+        // Start Auto-play
+        this.startAutoPlay();
+    }
+
+    updateSliderPosition() {
+        const { state } = this.testimonials;
+        const translateX = -state.currentIndex * state.slideWidth;
+        this.testimonials.track.style.transform = `translateX(${translateX}px)`;
+        this.testimonials.track.style.transition = `transform ${state.transitionDuration}ms ease`;
+
+        this.updateDots();
+    }
+
+    nextSlide() {
+        const { state } = this.testimonials;
+        state.currentIndex = (state.currentIndex + 1) % state.totalSlides;
+        this.updateSliderPosition();
+    }
+
+    previousSlide() {
+        const { state } = this.testimonials;
+        state.currentIndex = (state.currentIndex - 1 + state.totalSlides) % state.totalSlides;
+        this.updateSliderPosition();
+    }
+
+    startAutoPlay() {
+        const { state } = this.testimonials;
+        state.autoPlayInterval = setInterval(() => this.nextSlide(), state.autoPlayDelay);
+    }
+
+    pauseAutoPlay() {
+        const { state } = this.testimonials;
+        clearInterval(state.autoPlayInterval);
+    }
+
+    resumeAutoPlay() {
+        this.startAutoPlay();
+    }
+
+    createEnhancedDots() {
+        const { controls, cards } = this.testimonials;
+        if (!controls.dots) return;
+
+        controls.dots.innerHTML = '';
+
+        this.dots = [];
+
+        cards.forEach((_, index) => {
+            const dot = document.createElement('button');
+            dot.classList.add('dot');
+            dot.addEventListener('click', () => {
+                this.testimonials.state.currentIndex = index;
+                this.updateSliderPosition();
+            });
+            controls.dots.appendChild(dot);
+            this.dots.push(dot);
+        });
+
+        this.updateDots();
+    }
+
+    updateDots() {
+        if (!this.dots) return;
+
+        this.dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === this.testimonials.state.currentIndex);
+        });
+    }
+
+    handleTouchStart(e) {
+        const { state, track } = this.testimonials;
+        state.isDragging = true;
+        state.startX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+        state.previousTranslate = -state.currentIndex * state.slideWidth;
+        track.style.transition = 'none';
+        this.pauseAutoPlay();
+    }
+
+    handleTouchMove(e) {
+        const { state, track } = this.testimonials;
+        if (!state.isDragging) return;
+
+        const currentPosition = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+        const diff = currentPosition - state.startX;
+        state.currentTranslate = state.previousTranslate + diff;
+        track.style.transform = `translateX(${state.currentTranslate}px)`;
+    }
+
+    handleTouchEnd() {
+        const { state } = this.testimonials;
+        state.isDragging = false;
+
+        const movedBy = state.currentTranslate - state.previousTranslate;
+        if (movedBy < -100 && state.currentIndex < state.totalSlides - 1) {
+            state.currentIndex += 1;
+        } else if (movedBy > 100 && state.currentIndex > 0) {
+            state.currentIndex -= 1;
+        }
+
+        this.updateSliderPosition();
+        this.resumeAutoPlay();
+    }
+
+    // Loading Sequence
+    handleInitialLoad() {
+        const { container, content } = this.loader;
+        document.body.style.overflow = 'hidden';
 
         setTimeout(() => {
-            loader.style.opacity = '0';
+            container.style.opacity = '0';
             setTimeout(() => {
-                loader.style.display = 'none';
+                container.style.display = 'none';
                 content.style.opacity = '1';
                 document.body.style.overflow = '';
-                
+
                 // Trigger initial animations
                 this.triggerInitialAnimations();
             }, 500);
         }, 1000);
     }
 
-    // Animation Utilities
     triggerInitialAnimations() {
         const elements = document.querySelectorAll('.animate-on-load');
         elements.forEach((el, index) => {
@@ -441,10 +481,31 @@ class PremiumSiteManager {
         };
     }
 
-    // Error Handling
+    handleResize() {
+        this.state.isMobile = window.innerWidth <= 768;
+        // Update any responsive components here
+        this.updateSliderPosition();
+    }
+
     handleError(error, context) {
         console.error(`Error in ${context}:`, error);
-        // Implement error tracking/reporting here
+        // Implement additional error tracking or user notifications if needed
+    }
+
+    triggerButtonAnimation(button) {
+        button.classList.add('clicked');
+        setTimeout(() => {
+            button.classList.remove('clicked');
+        }, 300);
+    }
+
+    triggerSequenceAnimation(element) {
+        const children = element.querySelectorAll('[data-animation-sequence-item]');
+        children.forEach((child, index) => {
+            setTimeout(() => {
+                child.classList.add('animate-in');
+            }, index * 100);
+        });
     }
 }
 
@@ -463,65 +524,114 @@ document.addEventListener('DOMContentLoaded', () => {
             left: 0;
             width: 0;
             height: 3px;
-            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            background: linear-gradient(to right, #27ae60, #2ecc71);
             z-index: 1000;
             transition: width 0.1s ease;
         }
 
-        .premium-loading-overlay {
+        .scroll-to-top {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            bottom: 30px;
+            right: 30px;
+            background-color: #27ae60;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
+            cursor: pointer;
+            transition: all 0.3s ease;
             opacity: 0;
             visibility: hidden;
+            z-index: 1000;
+        }
+
+        .scroll-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-to-top:hover {
+            background-color: #2ecc71;
+            transform: scale(1.1);
+        }
+
+        .header-scrolled {
+            background: rgba(0, 0, 0, 0.8);
+            transition: background 0.3s ease;
+        }
+
+        .header-hidden {
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .animate-in {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .animate-on-load {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .form-field-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .form-field-wrapper input,
+        .form-field-wrapper textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .form-field-wrapper label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #999;
             transition: all 0.3s ease;
+            pointer-events: none;
         }
 
-        .loading-content {
-            text-align: center;
-            color: white;
+        .form-field-wrapper.focused label,
+        .form-field-wrapper input:not(:placeholder-shown) + label,
+        .form-field-wrapper textarea:not(:placeholder-shown) + label {
+            top: -15px;
+            font-size: 12px;
+            color: #27ae60;
         }
 
-        .premium-spinner {
-            width: 50px;
-            height: 50px;
-            animation: rotate 2s linear infinite;
+        .invalid {
+            border-color: #e74c3c;
         }
 
-        .premium-spinner .path {
-            stroke: var(--primary);
-            stroke-linecap: round;
-            animation: dash 1.5s ease-in-out infinite;
+        .submit-button.loading::after {
+            content: '';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            width: 20px;
+            height: 20px;
+            margin-top: -10px;
+            border: 2px solid #fff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        @keyframes rotate {
+        @keyframes spin {
             100% { transform: rotate(360deg); }
-        }
-
-        @keyframes dash {
-            0% {
-                stroke-dasharray: 1, 150;
-                stroke-dashoffset: 0;
-            }
-            50% {
-                stroke-dasharray: 90, 150;
-                stroke-dashoffset: -35;
-            }
-            100% {
-                stroke-dasharray: 90, 150;
-                stroke-dashoffset: -124;
-            }
         }
     `;
     document.head.appendChild(style);
 
-    // Initialize Site
-    window.premiumSite = new PremiumSiteManager();
+    // Initialize Site Manager
+    new PremiumSiteManager();
 });
