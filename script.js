@@ -340,3 +340,139 @@ class PremiumSiteManager {
 window.addEventListener('DOMContentLoaded', () => {
     window.premiumSite = new PremiumSiteManager();
 });
+class TestimonialSlider {
+    constructor() {
+        this.container = document.querySelector('.testimonial-container');
+        this.track = document.querySelector('.testimonial-track');
+        this.cards = Array.from(document.querySelectorAll('.testimonial-card'));
+        this.prevBtn = document.querySelector('.prev-btn');
+        this.nextBtn = document.querySelector('.next-btn');
+        this.dotsContainer = document.querySelector('.slider-dots');
+        
+        this.currentIndex = 1;
+        this.cardWidth = 0;
+        this.isAnimating = false;
+
+        this.init();
+    }
+
+    init() {
+        if (!this.track || !this.cards.length) return;
+
+        // Clone first and last slides
+        const firstClone = this.cards[0].cloneNode(true);
+        const lastClone = this.cards[this.cards.length - 1].cloneNode(true);
+        
+        this.track.appendChild(firstClone);
+        this.track.prepend(lastClone);
+        
+        // Update cards array with clones
+        this.cards = Array.from(this.track.querySelectorAll('.testimonial-card'));
+        
+        // Calculate card width including gap
+        this.cardWidth = this.cards[0].offsetWidth + 30;
+        this.totalSlides = this.cards.length - 2; // Subtract clones
+
+        // Set initial position
+        this.updatePosition(false);
+        this.createDots();
+        this.setupEventListeners();
+
+        // Handle resize
+        window.addEventListener('resize', this.debounce(() => {
+            this.cardWidth = this.cards[0].offsetWidth + 30;
+            this.updatePosition(false);
+        }, 250));
+    }
+
+    createDots() {
+        if (!this.dotsContainer) return;
+        
+        for (let i = 0; i < this.totalSlides; i++) {
+            const dot = document.createElement('button');
+            dot.className = 'slider-dot';
+            dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+            dot.addEventListener('click', () => this.goToSlide(i + 1));
+            this.dotsContainer.appendChild(dot);
+        }
+        this.updateDots();
+    }
+
+    setupEventListeners() {
+        if (this.prevBtn) {
+            this.prevBtn.addEventListener('click', () => this.slide('prev'));
+        }
+        if (this.nextBtn) {
+            this.nextBtn.addEventListener('click', () => this.slide('next'));
+        }
+
+        this.track.addEventListener('transitionend', () => this.handleTransitionEnd());
+    }
+
+    slide(direction) {
+        if (this.isAnimating) return;
+        this.isAnimating = true;
+        
+        this.currentIndex += direction === 'next' ? 1 : -1;
+        this.updatePosition();
+    }
+
+    updatePosition(withTransition = true) {
+        if (!this.track) return;
+        
+        this.track.style.transition = withTransition ? 'transform 0.5s ease-in-out' : 'none';
+        this.track.style.transform = `translateX(${-this.currentIndex * this.cardWidth}px)`;
+        
+        if (withTransition) {
+            this.updateDots();
+        }
+    }
+
+    handleTransitionEnd() {
+        this.isAnimating = false;
+
+        // Handle infinite scroll
+        if (this.currentIndex === 0) {
+            this.currentIndex = this.totalSlides;
+            this.updatePosition(false);
+        } else if (this.currentIndex === this.totalSlides + 1) {
+            this.currentIndex = 1;
+            this.updatePosition(false);
+        }
+    }
+
+    goToSlide(index) {
+        if (this.isAnimating) return;
+        this.isAnimating = true;
+        this.currentIndex = index;
+        this.updatePosition();
+    }
+
+    updateDots() {
+        if (!this.dotsContainer) return;
+
+        const dots = Array.from(this.dotsContainer.children);
+        const actualIndex = this.currentIndex === 0 
+            ? this.totalSlides - 1 
+            : this.currentIndex === this.totalSlides + 1 
+                ? 0 
+                : this.currentIndex - 1;
+
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === actualIndex);
+        });
+    }
+
+    debounce(func, wait) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    new TestimonialSlider();
+});
