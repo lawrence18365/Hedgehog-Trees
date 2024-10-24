@@ -517,43 +517,98 @@
             </article>
         </div>
     </div>
-            <!-- Contact Section -->
-            <section id="contact" class="contact-section">
-                <div class="container">
-                    <h2 class="section-title">Contact Us Today</h2>
-                    <form id="contact-form" class="contact-form" action="submit-form.php" method="post">
-                        <div class="form-group">
-                            <div class="form-control">
-                                <input type="text" id="name" name="name" required>
-                                <label for="name">Your Name</label>
-                            </div>
-                            <div class="form-control">
-                                <input type="tel" id="phone" name="phone" required>
-                                <label for="phone">Phone Number</label>
-                            </div>
-                            <div class="form-control">
-                                <input type="email" id="email" name="email" required>
-                                <label for="email">Email Address</label>
-                            </div>
-                        </div>
-                        <div class="form-control">
-                            <textarea id="message" name="message" rows="5" required></textarea>
-                            <label for="message">Your Message</label>
-                        </div>
-                        <button type="submit" class="submit-button">
-                            Submit & Get Your Free Quote
-                        </button>
-                    </form>
+           <section id="contact" class="contact-section">
+    <div class="contact-background-pattern"></div>
+    <div class="container">
+        <header class="section-header" data-aos="fade-up">
+            <span class="overline">Get In Touch</span>
+            <h2 class="section-title">Start Your Project</h2>
+            <p class="section-subtitle">Transform your outdoor space with our expert team</p>
+        </header>
 
-                    <div class="contact-info">
-                        <p><strong>Phone:</strong> <a href="tel:(123)456-7890">(123) 456-7890</a></p>
-                        <p><strong>Email:</strong> <a href="mailto:info@hedgehogtrees.com">info@hedgehogtrees.com</a></p>
-                        <p><strong>Operating Hours:</strong> Mon-Fri 8am - 6pm</p>
-                        <p><strong>Service Areas:</strong> Sydney and nearby suburbs</p>
+        <div class="contact-wrapper">
+            <div class="contact-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="contact-info">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div class="info-content">
+                                <h3>Call Us</h3>
+                                <a href="tel:(123)456-7890">(123) 456-7890</a>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="info-content">
+                                <h3>Email Us</h3>
+                                <a href="mailto:info@hedgehogtrees.com">info@hedgehogtrees.com</a>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="info-content">
+                                <h3>Operating Hours</h3>
+                                <p>Mon-Fri: 8am - 6pm</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </section>
-        </main>
+
+                <form id="contact-form" class="contact-form" action="submit-form.php" method="post">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <div class="input-wrapper">
+                                <input type="text" id="name" name="name" required>
+                                <label for="name">Your Name</label>
+                                <div class="input-focus"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="input-wrapper">
+                                <input type="tel" id="phone" name="phone" required>
+                                <label for="phone">Phone Number</label>
+                                <div class="input-focus"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <div class="input-wrapper">
+                                <input type="email" id="email" name="email" required>
+                                <label for="email">Email Address</label>
+                                <div class="input-focus"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <div class="input-wrapper">
+                                <textarea id="message" name="message" rows="4" required></textarea>
+                                <label for="message">Your Message</label>
+                                <div class="input-focus"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-button">
+                        <span class="button-content">
+                            <span class="button-text">Send Message</span>
+                            <span class="button-icon">
+                                <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+ </section>
+</main>
 
         <!-- Footer -->
         <footer id="footer" class="site-footer">
