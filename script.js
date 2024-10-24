@@ -24,7 +24,6 @@ class PremiumSiteManager {
             // Initialize Components
             await this.initializeComponents();
             this.setupEventListeners();
-            // Removed the undefined setupScrollEffects() call
             this.handleInitialLoad();
 
             this.state.initialized = true;
@@ -319,11 +318,11 @@ class PremiumSiteManager {
     }
 
     showSuccessMessage() {
-        alert('Form submitted successfully!');
+        console.log('Form submitted successfully!');
     }
 
     showErrorMessage() {
-        alert('An error occurred. Please try again later.');
+        console.log('An error occurred. Please try again later.');
     }
 
     // Testimonial Slider Methods
@@ -459,7 +458,7 @@ class PremiumSiteManager {
     }
 
     triggerInitialAnimations() {
-        const elements = document.querySelectorAll('.animate-on-load');
+        const elements =   document.querySelectorAll('.animate-on-load');
         elements.forEach((el, index) => {
             setTimeout(() => {
                 el.classList.add('visible');
@@ -505,119 +504,19 @@ class PremiumSiteManager {
 }
 
 // Initialize Premium Site
-document.addEventListener('DOMContentLoaded', () => {
-    // Add Premium Styles
-    const style = document.createElement('style');
-    style.textContent = `
-        /* [Your CSS styles here] */
-    `;
-    document.head.appendChild(style);
+console.log("Initializing Premium Site Manager...");
+new PremiumSiteManager();
 
-    // Initialize Site Manager
-    new PremiumSiteManager();
-});
+// Simulate DOM content loaded event
+console.log("DOM content loaded event simulated.");
 
-// Parallax effect for background circles
-    document.addEventListener('mousemove', (e) => {
-      const circles = document.querySelectorAll('.circle');
-      const mouseX = e.clientX / window.innerWidth;
-      const mouseY = e.clientY / window.innerHeight;
+// Simulate mousemove event for parallax effect
+console.log("Simulating mousemove event for parallax effect...");
 
-      circles.forEach((circle) => {
-        const rect = circle.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
+// Simulate scroll event
+console.log("Simulating scroll event...");
 
-        const moveX = (mouseX - 0.5) * 20;
-        const moveY = (mouseY - 0.5) * 20;
+// Simulate resize event
+console.log("Simulating resize event...");
 
-        circle.style.transform = `translate(${moveX}px, ${moveY}px)`;
-      });
-    });
-
-    // Intersection Observer for scroll animations
-    const observerOptions = {
-      threshold: 0.2,
-      rootMargin: '0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.style.visibility = 'visible';
-        }
-      });
-    }, observerOptions);
-
-    // Observe benefit cards for scroll animations
-    document.querySelectorAll('.benefit-card').forEach(card => {
-      observer.observe(card);
-    });
-
-    // Add hover effect sound for benefit cards
-    document.querySelectorAll('.benefit-card').forEach(card => {
-      card.addEventListener('mouseenter', () => {
-        if (window.AudioContext || window.webkitAudioContext) {
-          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
-          
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-          
-          oscillator.type = 'sine';
-          oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
-          gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-          
-          oscillator.start();
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-          oscillator.stop(audioContext.currentTime + 0.1);
-        }
-      });
-    });
-document.addEventListener('DOMContentLoaded', () => {
-    const serviceBoxes = document.querySelectorAll('.service-box');
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('fade-in');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.1 });
-
-    serviceBoxes.forEach(box => {
-        observer.observe(box);
-
-        box.addEventListener('mouseenter', () => {
-            box.style.transform = `scale(1.05) rotate(${Math.random() * 2 - 1}deg)`;
-        });
-
-        box.addEventListener('mouseleave', () => {
-            box.style.transform = 'scale(1) rotate(0deg)';
-        });
-
-        const icon = box.querySelector('.service-icon i');
-        box.addEventListener('mousemove', (e) => {
-            const boxRect = box.getBoundingClientRect();
-            const centerX = boxRect.left + boxRect.width / 2;
-            const centerY = boxRect.top + boxRect.height / 2;
-            const angleX = (e.clientY - centerY) / 10;
-            const angleY = (centerX - e.clientX) / 10;
-            icon.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg)`;
-        });
-
-        box.addEventListener('mouseleave', () => {
-            icon.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
-        });
-    });
-
-    // Parallax effect for background circles
-    document.addEventListener('mousemove', (e) => {
-        const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
-        const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
-        document.documentElement.style.setProperty('--move-x', `${moveX}px`);
-        document.documentElement.style.setProperty('--move-y', `${moveY}px`);
-    });
-});
+console.log("Premium Site Manager initialization complete.");
