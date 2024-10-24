@@ -257,3 +257,25 @@ window.addEventListener('load', function() {
     const loader = document.querySelector('.loader-container');
     loader.style.display = 'none';
 });
+document.addEventListener('DOMContentLoaded', function() {
+  const loader = document.querySelector('.loader-container');
+  const content = document.querySelector('.content-container');
+  
+  // Ensure content is hidden initially
+  content.style.opacity = '0';
+  
+  // Function to handle the loading sequence
+  function handleLoading() {
+    // First, fade out the loader
+    loader.style.opacity = '0';
+    
+    // After loader fades out, show the content
+    setTimeout(() => {
+      loader.style.display = 'none';
+      content.style.opacity = '1';
+    }, 800); // This matches the transition duration
+  }
+  
+  // Simulate loading time (adjust as needed)
+  setTimeout(handleLoading, 2000);
+});
