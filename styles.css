@@ -536,7 +536,6 @@ body {
       color: var(--text-dark);
       margin-bottom: 1rem;
       position: relative;
-      display: inline-block;
     }
 
     .section-title::after {
