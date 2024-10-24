@@ -503,7 +503,7 @@ body {
 .secondary-button {
     background-color: transparent;
     color: var(--white);
-    border: 2px solid var(--white);
+    border: 2px solid white;
 }
 
 .hero-button:hover {
