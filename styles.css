@@ -1490,7 +1490,6 @@ body {
     -webkit-box-orient: vertical;
     overflow: hidden;
      margin: 0;
-    padding-top: 40px;
     min-height: 0; /* Allows text to take natural height */
     max-height: 320px; /* Ensures consistent space for footer  */
 }
