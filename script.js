@@ -49,7 +49,7 @@ class SiteManager {
         if (!this.track || !this.cards.length) return;
 
         this.sliderState = {
-            currentIndex: 1,
+            currentIndex: 0,
             startX: 0,
             isDragging: false,
             currentTranslate: 0,
@@ -65,17 +65,23 @@ class SiteManager {
     createDots() {
         if (!this.dotsContainer) return;
         
+        this.dots = [];
+
         this.cards.forEach((_, index) => {
             const dot = document.createElement('div');
             dot.classList.add('dot');
             dot.addEventListener('click', () => this.goToSlide(index));
             this.dotsContainer.appendChild(dot);
+            this.dots.push(dot);
         });
+
+        this.updateDots();
     }
 
     updateDots() {
-        const dots = document.querySelectorAll('.dot');
-        dots.forEach((dot, index) => {
+        if (!this.dots) return;
+
+        this.dots.forEach((dot, index) => {
             dot.classList.toggle('active', index === this.sliderState.currentIndex);
         });
     }
@@ -106,17 +112,42 @@ class SiteManager {
     nextSlide() {
         if (this.sliderState.currentIndex < this.cards.length - 1) {
             this.goToSlide(this.sliderState.currentIndex + 1);
+        } else {
+            // Loop back to first slide
+            this.goToSlide(0);
         }
     }
 
     prevSlide() {
         if (this.sliderState.currentIndex > 0) {
             this.goToSlide(this.sliderState.currentIndex - 1);
+        } else {
+            // Loop to last slide
+            this.goToSlide(this.cards.length - 1);
         }
     }
 
     startAutoPlay() {
-        setInterval(() => this.nextSlide(), 5000);
+        this.autoPlayInterval = setInterval(() => this.nextSlide(), 5000);
+    }
+
+    setupSliderEvents() {
+        // Slider Events
+        if (this.track && this.cards.length) {
+            if (this.prevBtn) this.prevBtn.addEventListener('click', () => this.prevSlide());
+            if (this.nextBtn) this.nextBtn.addEventListener('click', () => this.nextSlide());
+
+            // Touch Events
+            this.track.addEventListener('touchstart', (e) => this.handleTouchStart(e));
+            this.track.addEventListener('touchmove', (e) => this.handleTouchMove(e));
+            this.track.addEventListener('touchend', () => this.handleTouchEnd());
+
+            // Mouse Events
+            this.track.addEventListener('mousedown', (e) => this.handleTouchStart(e));
+            this.track.addEventListener('mousemove', (e) => this.handleTouchMove(e));
+            this.track.addEventListener('mouseup', () => this.handleTouchEnd());
+            this.track.addEventListener('mouseleave', () => this.handleTouchEnd());
+        }
     }
 
     // Touch Event Handlers
@@ -124,45 +155,58 @@ class SiteManager {
         this.sliderState.startX = this.getPositionX(event);
         this.sliderState.isDragging = true;
         this.track.style.cursor = 'grabbing';
+        this.sliderState.animationID = requestAnimationFrame(this.animate.bind(this));
     }
 
     handleTouchMove(event) {
         if (!this.sliderState.isDragging) return;
         
         const currentX = this.getPositionX(event);
-        const diff = this.sliderState.startX - currentX;
-        const cardWidth = this.cards[0].offsetWidth;
-        
-        if (
-            (this.sliderState.currentIndex === 0 && diff < 0) || 
-            (this.sliderState.currentIndex === this.cards.length - 1 && diff > 0)
-        ) {
-            return;
-        }
-        
-        this.sliderState.currentTranslate = this.sliderState.previousTranslate - diff;
-        this.track.style.transform = `translateX(${this.sliderState.currentTranslate}px)`;
+        const diff = currentX - this.sliderState.startX;
+        this.sliderState.currentTranslate = this.sliderState.previousTranslate + diff;
+        this.setSliderPosition();
     }
 
     handleTouchEnd() {
+        cancelAnimationFrame(this.sliderState.animationID);
         this.sliderState.isDragging = false;
-        this.track.style.cursor = 'grab';
-        
         const movedBy = this.sliderState.currentTranslate - this.sliderState.previousTranslate;
+        const cardWidth = this.cards[0].offsetWidth;
         
-        if (Math.abs(movedBy) > 100) {
-            if (movedBy < 0) {
-                this.nextSlide();
-            } else {
-                this.prevSlide();
-            }
-        } else {
-            this.goToSlide(this.sliderState.currentIndex);
+        if (movedBy < -50 && this.sliderState.currentIndex < this.cards.length - 1) {
+            this.sliderState.currentIndex += 1;
         }
+
+        if (movedBy > 50 && this.sliderState.currentIndex > 0) {
+            this.sliderState.currentIndex -= 1;
+        }
+
+        this.setPositionByIndex();
+        this.track.style.cursor = 'grab';
     }
 
     getPositionX(event) {
         return event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+    }
+
+    animate() {
+        this.setSliderPosition();
+        if (this.sliderState.isDragging) {
+            requestAnimationFrame(this.animate.bind(this));
+        }
+    }
+
+    setSliderPosition() {
+        this.track.style.transform = `translateX(${this.sliderState.currentTranslate}px)`;
+    }
+
+    setPositionByIndex() {
+        this.sliderState.currentTranslate = -this.sliderState.currentIndex * this.cards[0].offsetWidth;
+        this.sliderState.previousTranslate = this.sliderState.currentTranslate;
+        this.track.style.transition = 'transform 0.5s ease-out';
+        this.setSliderPosition();
+        this.updateDots();
+        this.updateButtons();
     }
 
     // Scroll Button Methods
@@ -193,7 +237,7 @@ class SiteManager {
         e.preventDefault();
 
         let isValid = true;
-        const formInputs = this.contactForm.querySelectorAll('input, textarea');
+        const formInputs = this.contactForm.querySelectorAll('input[required], textarea[required]');
 
         formInputs.forEach(input => {
             if (!input.value.trim()) {
@@ -208,7 +252,7 @@ class SiteManager {
             alert('Form submitted successfully!');
             this.contactForm.reset();
         } else {
-            alert('Please fill out all fields.');
+            alert('Please fill out all required fields.');
         }
     }
 
@@ -216,12 +260,18 @@ class SiteManager {
     setupSmoothScrolling() {
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', (e) => {
-                e.preventDefault();
-                const target = document.querySelector(anchor.getAttribute('href'));
+                const href = anchor.getAttribute('href');
+                if (href === '#' || href === '') return;
+
+                const target = document.querySelector(href);
                 if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
+                    e.preventDefault();
+                    const headerOffset = document.querySelector('.site-header').offsetHeight;
+                    const elementPosition = target.offsetTop - headerOffset;
+
+                    window.scrollTo({
+                        top: elementPosition,
+                        behavior: 'smooth'
                     });
                 }
             });
@@ -230,23 +280,6 @@ class SiteManager {
 
     // Event Listeners Setup
     setupEventListeners() {
-        // Slider Events
-        if (this.track && this.cards.length) {
-            if (this.prevBtn) this.prevBtn.addEventListener('click', () => this.prevSlide());
-            if (this.nextBtn) this.nextBtn.addEventListener('click', () => this.nextSlide());
-
-            // Touch Events
-            this.track.addEventListener('touchstart', (e) => this.handleTouchStart(e));
-            this.track.addEventListener('touchmove', (e) => this.handleTouchMove(e));
-            this.track.addEventListener('touchend', () => this.handleTouchEnd());
-
-            // Mouse Events
-            this.track.addEventListener('mousedown', (e) => this.handleTouchStart(e));
-            this.track.addEventListener('mousemove', (e) => this.handleTouchMove(e));
-            this.track.addEventListener('mouseup', () => this.handleTouchEnd());
-            this.track.addEventListener('mouseleave', () => this.handleTouchEnd());
-        }
-
         // Form Events
         if (this.contactForm) {
             this.contactForm.addEventListener('submit', (e) => this.handleFormSubmit(e));
@@ -314,7 +347,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Site Manager
     new SiteManager();
+
+    // Initialize Header Controller
+    new HeaderController();
 });
+
 // Header Controller Class
 class HeaderController {
     constructor() {
@@ -347,11 +384,6 @@ class HeaderController {
             link.addEventListener('click', (e) => this.handleNavClick(e, link));
         });
 
-        // Social link effects
-        document.querySelectorAll('.social-link').forEach(link => {
-            link.addEventListener('mouseenter', () => this.addRippleEffect(link));
-        });
-
         // Handle resize events
         window.addEventListener('resize', this.debounce(() => this.handleResize(), 250));
 
@@ -362,7 +394,7 @@ class HeaderController {
     setupIntersectionObserver() {
         const options = {
             rootMargin: '-100px 0px 0px 0px',
-            threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+            threshold: [0]
         };
 
         const observer = new IntersectionObserver(entries => {
@@ -409,6 +441,7 @@ class HeaderController {
             }
         } else {
             this.header.classList.remove('sticky');
+            this.header.style.transform = 'translateY(0)';
         }
         
         this.lastScroll = currentScroll;
@@ -445,14 +478,6 @@ class HeaderController {
         }
     }
 
-    addRippleEffect(link) {
-        const ripple = document.createElement('div');
-        ripple.classList.add('ripple');
-        link.appendChild(ripple);
-        
-        ripple.addEventListener('animationend', () => ripple.remove());
-    }
-
     handleResize() {
         if (window.innerWidth > 768 && this.isMenuOpen) {
             this.toggleMobileMenu();
@@ -478,23 +503,3 @@ class HeaderController {
         };
     }
 }
-
-// Initialize Header
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize loader
-    const loader = document.querySelector('.loader-container');
-    const content = document.querySelector('.content-container');
-    
-    // Handle page load
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            loader.style.opacity = '0';
-            setTimeout(() => {
-                loader.style.display = 'none';
-                content.style.opacity = '1';
-                // Initialize header controller
-                new HeaderController();
-            }, 500);
-        }, 1500);
-    });
-});
