@@ -1,281 +1,317 @@
-// Main Site Functionality
-document.addEventListener("DOMContentLoaded", function() {
-    // Testimonial Slider Variables
-    const track = document.querySelector('.testimonial-track');
-    const cards = Array.from(document.querySelectorAll('.testimonial-card'));
-    const prevBtn = document.querySelector('.prev-btn');
-    const nextBtn = document.querySelector('.next-btn');
-    const dotsContainer = document.querySelector('.slider-dots');
-    
-    let currentIndex = 1; // Start at second card
-    let startX;
-    let isDragging = false;
-    let currentTranslate = 0;
-    let previousTranslate = 0;
-
-    // Slider Functions
-    function initSlider() {
-        if (!track || !cards.length) return;
-        const cardWidth = cards[0].offsetWidth;
-        track.style.transform = `translateX(-${cardWidth * currentIndex}px)`;
-        updateDots();
-        updateButtons();
+// Site Functionality Manager
+class SiteManager {
+    constructor() {
+        this.initializeComponents();
+        this.setupEventListeners();
     }
 
-    // Create Navigation Dots
-    function createDots() {
-        if (!dotsContainer) return;
-        cards.forEach((_, index) => {
+    initializeComponents() {
+        // Loader Setup
+        this.loader = document.querySelector('.loader-container');
+        this.content = document.querySelector('.content-container');
+        this.setupLoader();
+
+        // Testimonial Slider Setup
+        this.track = document.querySelector('.testimonial-track');
+        this.cards = Array.from(document.querySelectorAll('.testimonial-card'));
+        this.prevBtn = document.querySelector('.prev-btn');
+        this.nextBtn = document.querySelector('.next-btn');
+        this.dotsContainer = document.querySelector('.slider-dots');
+        this.setupSlider();
+
+        // Form Setup
+        this.contactForm = document.getElementById('contact-form');
+        
+        // Scroll Button Setup
+        this.createScrollButton();
+    }
+
+    // Loader Methods
+    setupLoader() {
+        if (!this.loader || !this.content) return;
+        
+        this.content.style.opacity = '0';
+        
+        const handleLoading = () => {
+            this.loader.style.opacity = '0';
+            setTimeout(() => {
+                this.loader.style.display = 'none';
+                this.content.style.opacity = '1';
+            }, 800);
+        };
+
+        // Simulate loading time
+        setTimeout(handleLoading, 2000);
+    }
+
+    // Slider Methods
+    setupSlider() {
+        if (!this.track || !this.cards.length) return;
+
+        this.sliderState = {
+            currentIndex: 1,
+            startX: 0,
+            isDragging: false,
+            currentTranslate: 0,
+            previousTranslate: 0
+        };
+
+        this.createDots();
+        this.initSlider();
+        this.setupSliderEvents();
+        this.startAutoPlay();
+    }
+
+    createDots() {
+        if (!this.dotsContainer) return;
+        
+        this.cards.forEach((_, index) => {
             const dot = document.createElement('div');
             dot.classList.add('dot');
-            dot.addEventListener('click', () => goToSlide(index));
-            dotsContainer.appendChild(dot);
+            dot.addEventListener('click', () => this.goToSlide(index));
+            this.dotsContainer.appendChild(dot);
         });
     }
 
-    // Update Navigation Dots
-    function updateDots() {
+    updateDots() {
         const dots = document.querySelectorAll('.dot');
         dots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === currentIndex);
+            dot.classList.toggle('active', index === this.sliderState.currentIndex);
         });
     }
 
-    // Update Navigation Buttons
-    function updateButtons() {
-        if (!prevBtn || !nextBtn) return;
-        prevBtn.disabled = currentIndex === 0;
-        nextBtn.disabled = currentIndex === cards.length - 1;
+    updateButtons() {
+        if (!this.prevBtn || !this.nextBtn) return;
+        
+        this.prevBtn.disabled = this.sliderState.currentIndex === 0;
+        this.nextBtn.disabled = this.sliderState.currentIndex === this.cards.length - 1;
     }
 
-    // Go to Specific Slide
-    function goToSlide(index) {
-        currentIndex = index;
-        const cardWidth = cards[0].offsetWidth;
-        track.style.transition = 'transform 0.5s ease';
-        track.style.transform = `translateX(-${cardWidth * currentIndex}px)`;
-        updateDots();
-        updateButtons();
+    initSlider() {
+        const cardWidth = this.cards[0].offsetWidth;
+        this.track.style.transform = `translateX(-${cardWidth * this.sliderState.currentIndex}px)`;
+        this.updateDots();
+        this.updateButtons();
     }
 
-    // Next Slide
-    function nextSlide() {
-        if (currentIndex < cards.length - 1) {
-            goToSlide(currentIndex + 1);
+    goToSlide(index) {
+        this.sliderState.currentIndex = index;
+        const cardWidth = this.cards[0].offsetWidth;
+        this.track.style.transition = 'transform 0.5s ease';
+        this.track.style.transform = `translateX(-${cardWidth * this.sliderState.currentIndex}px)`;
+        this.updateDots();
+        this.updateButtons();
+    }
+
+    nextSlide() {
+        if (this.sliderState.currentIndex < this.cards.length - 1) {
+            this.goToSlide(this.sliderState.currentIndex + 1);
         }
     }
 
-    // Previous Slide
-    function prevSlide() {
-        if (currentIndex > 0) {
-            goToSlide(currentIndex - 1);
+    prevSlide() {
+        if (this.sliderState.currentIndex > 0) {
+            this.goToSlide(this.sliderState.currentIndex - 1);
         }
+    }
+
+    startAutoPlay() {
+        setInterval(() => this.nextSlide(), 5000);
     }
 
     // Touch Event Handlers
-    function touchStart(event) {
-        startX = getPositionX(event);
-        isDragging = true;
-        track.style.cursor = 'grabbing';
+    handleTouchStart(event) {
+        this.sliderState.startX = this.getPositionX(event);
+        this.sliderState.isDragging = true;
+        this.track.style.cursor = 'grabbing';
     }
 
-    function touchMove(event) {
-        if (!isDragging) return;
+    handleTouchMove(event) {
+        if (!this.sliderState.isDragging) return;
         
-        const currentX = getPositionX(event);
-        const diff = startX - currentX;
-        const cardWidth = cards[0].offsetWidth;
+        const currentX = this.getPositionX(event);
+        const diff = this.sliderState.startX - currentX;
+        const cardWidth = this.cards[0].offsetWidth;
         
         if (
-            (currentIndex === 0 && diff < 0) || // First slide
-            (currentIndex === cards.length - 1 && diff > 0) // Last slide
+            (this.sliderState.currentIndex === 0 && diff < 0) || 
+            (this.sliderState.currentIndex === this.cards.length - 1 && diff > 0)
         ) {
             return;
         }
         
-        currentTranslate = previousTranslate - diff;
-        track.style.transform = `translateX(${currentTranslate}px)`;
+        this.sliderState.currentTranslate = this.sliderState.previousTranslate - diff;
+        this.track.style.transform = `translateX(${this.sliderState.currentTranslate}px)`;
     }
 
-    function touchEnd() {
-        isDragging = false;
-        track.style.cursor = 'grab';
+    handleTouchEnd() {
+        this.sliderState.isDragging = false;
+        this.track.style.cursor = 'grab';
         
-        const movedBy = currentTranslate - previousTranslate;
+        const movedBy = this.sliderState.currentTranslate - this.sliderState.previousTranslate;
         
         if (Math.abs(movedBy) > 100) {
             if (movedBy < 0) {
-                nextSlide();
+                this.nextSlide();
             } else {
-                prevSlide();
+                this.prevSlide();
             }
         } else {
-            goToSlide(currentIndex);
+            this.goToSlide(this.sliderState.currentIndex);
         }
     }
 
-    function getPositionX(event) {
+    getPositionX(event) {
         return event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
     }
 
-    // Initialize Slider
-    if (track && cards.length) {
-        createDots();
-        initSlider();
-
-        // Event Listeners for Slider
-        if (prevBtn) prevBtn.addEventListener('click', prevSlide);
-        if (nextBtn) nextBtn.addEventListener('click', nextSlide);
-
-        // Touch Events
-        track.addEventListener('touchstart', touchStart);
-        track.addEventListener('touchmove', touchMove);
-        track.addEventListener('touchend', touchEnd);
-
-        // Mouse Events
-        track.addEventListener('mousedown', touchStart);
-        track.addEventListener('mousemove', touchMove);
-        track.addEventListener('mouseup', touchEnd);
-        track.addEventListener('mouseleave', touchEnd);
-
-        // Auto-play (optional)
-        setInterval(nextSlide, 5000);
-
-        // Handle Window Resize
-        window.addEventListener('resize', initSlider);
+    // Scroll Button Methods
+    createScrollButton() {
+        this.scrollTopButton = document.createElement('button');
+        this.scrollTopButton.className = 'scroll-to-top';
+        this.scrollTopButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+        document.body.appendChild(this.scrollTopButton);
     }
 
-    // Smooth Scrolling for Anchor Links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
-    });
-
-    // Form Validation
-    const contactForm = document.getElementById('contact-form');
-    if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            let isValid = true;
-            const formInputs = contactForm.querySelectorAll('input, textarea');
-
-            formInputs.forEach(input => {
-                if (!input.value) {
-                    input.classList.add('error');
-                    isValid = false;
-                } else {
-                    input.classList.remove('error');
-                }
-            });
-
-            if (isValid) {
-                alert('Form submitted successfully!');
-                contactForm.reset();
-            } else {
-                alert('Please fill out all fields.');
-            }
-        });
-    }
-
-    // Scroll-to-Top Button
-    const scrollTopButton = document.createElement('button');
-    scrollTopButton.className = 'scroll-to-top';
-    scrollTopButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
-    document.body.appendChild(scrollTopButton);
-
-    window.addEventListener('scroll', () => {
+    handleScroll() {
         if (window.scrollY > 300) {
-            scrollTopButton.classList.add('visible');
+            this.scrollTopButton.classList.add('visible');
         } else {
-            scrollTopButton.classList.remove('visible');
+            this.scrollTopButton.classList.remove('visible');
         }
-    });
+    }
 
-    scrollTopButton.addEventListener('click', () => {
+    scrollToTop() {
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
         });
-    });
-});
-
-// Add Interactive Styles
-const style = document.createElement('style');
-style.innerHTML = `
-    .error {
-        border: 2px solid #e74c3c;
-        animation: shake 0.3s ease;
     }
 
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-5px); }
-        50% { transform: translateX(5px); }
-        75% { transform: translateX(-5px); }
+    // Form Methods
+    handleFormSubmit(e) {
+        e.preventDefault();
+
+        let isValid = true;
+        const formInputs = this.contactForm.querySelectorAll('input, textarea');
+
+        formInputs.forEach(input => {
+            if (!input.value.trim()) {
+                input.classList.add('error');
+                isValid = false;
+            } else {
+                input.classList.remove('error');
+            }
+        });
+
+        if (isValid) {
+            alert('Form submitted successfully!');
+            this.contactForm.reset();
+        } else {
+            alert('Please fill out all fields.');
+        }
     }
 
-    .scroll-to-top {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        background-color: #000000;
-        color: #fff;
-        border: none;
-        padding: 10px 15px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        opacity: 0;
-        visibility: hidden;
-        z-index: 1000;
+    // Smooth Scrolling
+    setupSmoothScrolling() {
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(anchor.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
     }
 
-    .scroll-to-top.visible {
-        opacity: 1;
-        visibility: visible;
-    }
+    // Event Listeners Setup
+    setupEventListeners() {
+        // Slider Events
+        if (this.track && this.cards.length) {
+            if (this.prevBtn) this.prevBtn.addEventListener('click', () => this.prevSlide());
+            if (this.nextBtn) this.nextBtn.addEventListener('click', () => this.nextSlide());
 
-    .scroll-to-top:hover {
-        background-color: #333333;
-        transform: scale(1.1);
+            // Touch Events
+            this.track.addEventListener('touchstart', (e) => this.handleTouchStart(e));
+            this.track.addEventListener('touchmove', (e) => this.handleTouchMove(e));
+            this.track.addEventListener('touchend', () => this.handleTouchEnd());
+
+            // Mouse Events
+            this.track.addEventListener('mousedown', (e) => this.handleTouchStart(e));
+            this.track.addEventListener('mousemove', (e) => this.handleTouchMove(e));
+            this.track.addEventListener('mouseup', () => this.handleTouchEnd());
+            this.track.addEventListener('mouseleave', () => this.handleTouchEnd());
+        }
+
+        // Form Events
+        if (this.contactForm) {
+            this.contactForm.addEventListener('submit', (e) => this.handleFormSubmit(e));
+        }
+
+        // Scroll Events
+        window.addEventListener('scroll', () => this.handleScroll());
+        this.scrollTopButton.addEventListener('click', () => this.scrollToTop());
+
+        // Window Resize
+        window.addEventListener('resize', () => this.initSlider());
+
+        // Smooth Scrolling
+        this.setupSmoothScrolling();
     }
-`;
-document.head.appendChild(style);
-window.addEventListener('load', function() {
-    const loader = document.querySelector('.loader-container');
-    loader.style.display = 'none';
-});
-document.addEventListener('DOMContentLoaded', function() {
-  const loader = document.querySelector('.loader-container');
-  const content = document.querySelector('.content-container');
-  
-  // Ensure content is hidden initially
-  content.style.opacity = '0';
-  
-  // Function to handle the loading sequence
-  function handleLoading() {
-    // First, fade out the loader
-    loader.style.opacity = '0';
-    
-    // After loader fades out, show the content
-    setTimeout(() => {
-      loader.style.display = 'none';
-      content.style.opacity = '1';
-    }, 800); // This matches the transition duration
-  }
-  
-  // Simulate loading time (adjust as needed)
-  setTimeout(handleLoading, 2000);
+}
+
+// Initialize Site
+document.addEventListener('DOMContentLoaded', () => {
+    // Add Interactive Styles
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .error {
+            border: 2px solid #e74c3c;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+
+        .scroll-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #000000;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 1000;
+        }
+
+        .scroll-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-to-top:hover {
+            background-color: #333333;
+            transform: scale(1.1);
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize Site Manager
+    new SiteManager();
 });
