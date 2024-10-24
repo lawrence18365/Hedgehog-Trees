@@ -364,7 +364,7 @@ body {
 #hero {
    position: relative;
    height: 100vh;
-   padding-top: calc(var(--header-height) + var(--top-bar-height));
+    margin-top: calc(var(--header-height) + var(--top-bar-height)); /* Changed from padding-top to margin-top */
    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
                url('https://i.postimg.cc/7LrgqvWP/image-6-1-min.jpg');
    background-size: cover;
