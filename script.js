@@ -315,3 +315,66 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Site Manager
     new SiteManager();
 });
+document.addEventListener('DOMContentLoaded', function() {
+    const header = document.querySelector('.site-header');
+    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+    const navContainer = document.querySelector('.nav-container');
+    const headerHeight = header.offsetHeight;
+    let lastScroll = 0;
+
+    // Sticky Header Logic
+    window.addEventListener('scroll', () => {
+        const currentScroll = window.pageYOffset;
+        
+        if (currentScroll > headerHeight) {
+            header.classList.add('sticky');
+            if (currentScroll > lastScroll) {
+                header.style.transform = 'translateY(-100%)';
+            } else {
+                header.style.transform = 'translateY(0)';
+            }
+        } else {
+            header.classList.remove('sticky');
+        }
+        
+        lastScroll = currentScroll;
+    });
+
+    // Mobile Menu Logic
+    mobileMenuToggle.addEventListener('click', () => {
+        navContainer.classList.toggle('active');
+        mobileMenuToggle.classList.toggle('active');
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!navContainer.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+            navContainer.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+        }
+    });
+
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('.nav-links a, .cta-button').forEach(link => {
+        link.addEventListener('click', (e) => {
+            const target = document.querySelector(link.getAttribute('href'));
+            if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                navContainer.classList.remove('active');
+                mobileMenuToggle.classList.remove('active');
+            }
+        });
+    });
+
+    // Add hover effects to social links
+    document.querySelectorAll('.social-link').forEach(link => {
+        link.addEventListener('mouseenter', (e) => {
+            const ripple = document.createElement('div');
+            ripple.classList.add('ripple');
+            link.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 1000);
+        });
+    });
+});
