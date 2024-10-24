@@ -238,9 +238,6 @@ body {
    left: 2rem;
    z-index: 1003;
    background: transparent;
-   padding: 10px 20px;
-   border-radius: 0 0 15px 15px;
-   box-shadow: var(--shadow-md);
 }
 
 .logo-link {
