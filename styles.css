@@ -447,107 +447,175 @@ nav ul li a:hover::after {
     color: var(--primary);
 }
 
-/* About Section */
-#about {
-    padding: 100px 0;
-    background-color: var(--white);
-    position: relative;
-}
+/* About Section Styles */
+        .about-section {
+            position: relative;
+            padding: 6rem 1rem;
+            background: linear-gradient(180deg, rgba(47,133,90,0.05) 0%, rgba(255,255,255,0) 100%);
+            overflow: hidden;
+        }
 
-.section-title {
-    font-size: 2.5rem;
-    text-align: center;
-    color: var(--text-dark);
-    margin-bottom: 50px;
-    position: relative;
-}
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
 
-.section-title::after {
-    content: '';
-    position: absolute;
-    bottom: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 4px;
-    background-color: var(--primary);
-}
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
 
-.about-intro {
-    font-size: 1.2rem;
-    text-align: center;
-    max-width: 800px;
-    margin: 0 auto 50px;
-    color: var(--text-dark);
-}
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
 
-.about-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
-    align-items: start;
-}
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary-color);
+            border-radius: 2px;
+        }
 
-.about-text p {
-    margin-bottom: 20px;
-    font-size: 1.1rem;
-    color: var(--text-dark);
-}
+        .about-intro {
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            font-size: 1.25rem;
+            color: var(--text-light);
+            text-align: center;
+        }
 
-.key-benefits {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 30px;
-}
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
 
-.benefit {
-    background-color: var(--white);
-    padding: 30px;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: var(--shadow-md);
-    transition: var(--transition-base);
-    position: relative;
-    overflow: hidden;
-}
+        .about-text {
+            font-size: 1.1rem;
+            color: var(--text-light);
+        }
 
-.benefit::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 0;
-    background-color: var(--primary);
-    transition: var(--transition-base);
-}
+        .about-text p {
+            margin-bottom: 1.5rem;
+        }
 
-.benefit:hover::before {
-    height: 100%;
-}
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
 
-.benefit:hover {
-    transform: translateY(-10px);
-    box-shadow: var(--shadow-lg);
-}
+        .benefit-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
 
-.benefit i {
-    font-size: 2.5rem;
-    color: var(--primary);
-    margin-bottom: 20px;
-}
+        .benefit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 0;
+            background-color: var(--primary-color);
+            transition: var(--transition);
+        }
 
-.benefit h3 {
-    font-size: 1.2rem;
-    margin-bottom: 15px;
-    color: var(--text-dark);
-}
+        .benefit-card:hover {
+            transform: translateY(-0.5rem);
+            box-shadow: var(--shadow-lg);
+        }
 
-.benefit p {
-    font-size: 0.9rem;
-    color: var(--text-dark);
-}
+        .benefit-card:hover::before {
+            height: 100%;
+        }
 
+        .benefit-icon {
+            width: 3.5rem;
+            height: 3.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .benefit-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .benefit-description {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .about-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .about-intro {
+                font-size: 1.1rem;
+            }
+
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Accessibility */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        /* Print Styles */
+        @media print {
+            .about-section {
+                background: none;
+                padding: 2rem 0;
+            }
+
+            .benefit-card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+
+            .benefit-card:hover {
+                transform: none;
+                box-shadow: none;
+            }
+        }
 /* Services Section */
 .services-section {
     background-color: var(--gray-light);
