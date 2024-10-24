@@ -1917,6 +1917,163 @@ body {
         break-inside: avoid;
     }
 }
+
+/* Our Work Section Styles */
+  .portfolio-section {
+            padding: var(--cta-padding) 0;
+            background: var(--background-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .portfolio-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(to bottom right, var(--white) 49.9%, transparent 50%);
+        }
+
+        .portfolio-section .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .portfolio-section .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            opacity: 0.8;
+            margin-top: 1rem;
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            padding: 0 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .portfolio-card {
+            position: relative;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .portfolio-media {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-base);
+            transform: translateZ(0);
+        }
+
+        .portfolio-media::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, var(--primary), transparent);
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            z-index: 1;
+        }
+
+        .portfolio-image {
+            width: 100%;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            transform: scale(1);
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .media-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, 
+                rgba(0,0,0,0.9) 0%,
+                rgba(0,0,0,0.4) 50%,
+                rgba(0,0,0,0) 100%);
+            display: flex;
+            align-items: flex-end;
+            padding: 2.5rem;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 2;
+        }
+
+        .overlay-content {
+            transform: translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .project-category {
+            display: block;
+            color: var(--text-light);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-shadow: var(--shadow-sm);
+        }
+
+        .project-description {
+            display: block;
+            color: var(--accent);
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .portfolio-card:hover .portfolio-media {
+            transform: translateY(-10px) translateZ(20px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+        }
+
+        .portfolio-card:hover .portfolio-media::before {
+            opacity: 0.2;
+        }
+
+        .portfolio-card:hover .portfolio-image {
+            transform: scale(1.05);
+        }
+
+        .portfolio-card:hover .media-overlay {
+            opacity: 1;
+        }
+
+        .portfolio-card:hover .overlay-content {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 1200px) {
+            .portfolio-grid {
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .portfolio-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+
+            .portfolio-section {
+                padding: 60px 0;
+            }
+
+            .portfolio-media {
+                aspect-ratio: 16/12;
+            }
+        }
 /* Contact Section */
 #contact {
     padding: 100px 0;
