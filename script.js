@@ -1,505 +1,527 @@
-// Site Functionality Manager
-class SiteManager {
+// Premium Site Core Functionality
+class PremiumSiteManager {
     constructor() {
-        this.initializeComponents();
-        this.setupEventListeners();
-    }
-
-    initializeComponents() {
-        // Loader Setup
-        this.loader = document.querySelector('.loader-container');
-        this.content = document.querySelector('.content-container');
-        this.setupLoader();
-
-        // Testimonial Slider Setup
-        this.track = document.querySelector('.testimonial-track');
-        this.cards = Array.from(document.querySelectorAll('.testimonial-card'));
-        this.prevBtn = document.querySelector('.prev-btn');
-        this.nextBtn = document.querySelector('.next-btn');
-        this.dotsContainer = document.querySelector('.slider-dots');
-        this.setupSlider();
-
-        // Form Setup
-        this.contactForm = document.getElementById('contact-form');
-        
-        // Scroll Button Setup
-        this.createScrollButton();
-    }
-
-    // Loader Methods
-    setupLoader() {
-        if (!this.loader || !this.content) return;
-        
-        this.content.style.opacity = '0';
-        
-        const handleLoading = () => {
-            this.loader.style.opacity = '0';
-            setTimeout(() => {
-                this.loader.style.display = 'none';
-                this.content.style.opacity = '1';
-            }, 800);
+        // Core State
+        this.state = {
+            isLoading: true,
+            isMobile: window.innerWidth <= 768,
+            hasScrolled: false,
+            initialized: false
         };
 
-        // Simulate loading time
-        setTimeout(handleLoading, 2000);
+        // Performance Optimization
+        this.frameRequest = null;
+        this.lastScrollPosition = 0;
+        this.scrollThreshold = 50;
+        this.scrollTimeout = null;
+
+        // Initialize Site
+        this.init();
     }
 
-    // Slider Methods
-    setupSlider() {
-        if (!this.track || !this.cards.length) return;
+    async init() {
+        try {
+            // Initialize Components
+            await this.initializeComponents();
+            this.setupEventListeners();
+            this.setupIntersectionObservers();
+            this.setupScrollEffects();
+            
+            // Start Loading Sequence
+            this.handleInitialLoad();
+            
+            this.state.initialized = true;
+        } catch (error) {
+            console.error('Initialization error:', error);
+            this.handleInitializationError();
+        }
+    }
 
-        this.sliderState = {
-            currentIndex: 0,
-            startX: 0,
-            isDragging: false,
-            currentTranslate: 0,
-            previousTranslate: 0
+    async initializeComponents() {
+        // Core Components
+        this.loader = {
+            container: document.querySelector('.loader-container'),
+            content: document.querySelector('.content-container'),
+            logo: document.querySelector('.logo-loader'),
+            spinner: document.querySelector('.spinner')
         };
 
-        this.createDots();
-        this.initSlider();
-        this.setupSliderEvents();
-        this.startAutoPlay();
-    }
-
-    createDots() {
-        if (!this.dotsContainer) return;
-        
-        this.dots = [];
-
-        this.cards.forEach((_, index) => {
-            const dot = document.createElement('div');
-            dot.classList.add('dot');
-            dot.addEventListener('click', () => this.goToSlide(index));
-            this.dotsContainer.appendChild(dot);
-            this.dots.push(dot);
-        });
-
-        this.updateDots();
-    }
-
-    updateDots() {
-        if (!this.dots) return;
-
-        this.dots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === this.sliderState.currentIndex);
-        });
-    }
-
-    updateButtons() {
-        if (!this.prevBtn || !this.nextBtn) return;
-        
-        this.prevBtn.disabled = this.sliderState.currentIndex === 0;
-        this.nextBtn.disabled = this.sliderState.currentIndex === this.cards.length - 1;
-    }
-
-    initSlider() {
-        const cardWidth = this.cards[0].offsetWidth;
-        this.track.style.transform = `translateX(-${cardWidth * this.sliderState.currentIndex}px)`;
-        this.updateDots();
-        this.updateButtons();
-    }
-
-    goToSlide(index) {
-        this.sliderState.currentIndex = index;
-        const cardWidth = this.cards[0].offsetWidth;
-        this.track.style.transition = 'transform 0.5s ease';
-        this.track.style.transform = `translateX(-${cardWidth * this.sliderState.currentIndex}px)`;
-        this.updateDots();
-        this.updateButtons();
-    }
-
-    nextSlide() {
-        if (this.sliderState.currentIndex < this.cards.length - 1) {
-            this.goToSlide(this.sliderState.currentIndex + 1);
-        } else {
-            // Loop back to first slide
-            this.goToSlide(0);
-        }
-    }
-
-    prevSlide() {
-        if (this.sliderState.currentIndex > 0) {
-            this.goToSlide(this.sliderState.currentIndex - 1);
-        } else {
-            // Loop to last slide
-            this.goToSlide(this.cards.length - 1);
-        }
-    }
-
-    startAutoPlay() {
-        this.autoPlayInterval = setInterval(() => this.nextSlide(), 5000);
-    }
-
-    setupSliderEvents() {
-        // Slider Events
-        if (this.track && this.cards.length) {
-            if (this.prevBtn) this.prevBtn.addEventListener('click', () => this.prevSlide());
-            if (this.nextBtn) this.nextBtn.addEventListener('click', () => this.nextSlide());
-
-            // Touch Events
-            this.track.addEventListener('touchstart', (e) => this.handleTouchStart(e));
-            this.track.addEventListener('touchmove', (e) => this.handleTouchMove(e));
-            this.track.addEventListener('touchend', () => this.handleTouchEnd());
-
-            // Mouse Events
-            this.track.addEventListener('mousedown', (e) => this.handleTouchStart(e));
-            this.track.addEventListener('mousemove', (e) => this.handleTouchMove(e));
-            this.track.addEventListener('mouseup', () => this.handleTouchEnd());
-            this.track.addEventListener('mouseleave', () => this.handleTouchEnd());
-        }
-    }
-
-    // Touch Event Handlers
-    handleTouchStart(event) {
-        this.sliderState.startX = this.getPositionX(event);
-        this.sliderState.isDragging = true;
-        this.track.style.cursor = 'grabbing';
-        this.sliderState.animationID = requestAnimationFrame(this.animate.bind(this));
-    }
-
-    handleTouchMove(event) {
-        if (!this.sliderState.isDragging) return;
-        
-        const currentX = this.getPositionX(event);
-        const diff = currentX - this.sliderState.startX;
-        this.sliderState.currentTranslate = this.sliderState.previousTranslate + diff;
-        this.setSliderPosition();
-    }
-
-    handleTouchEnd() {
-        cancelAnimationFrame(this.sliderState.animationID);
-        this.sliderState.isDragging = false;
-        const movedBy = this.sliderState.currentTranslate - this.sliderState.previousTranslate;
-        const cardWidth = this.cards[0].offsetWidth;
-        
-        if (movedBy < -50 && this.sliderState.currentIndex < this.cards.length - 1) {
-            this.sliderState.currentIndex += 1;
-        }
-
-        if (movedBy > 50 && this.sliderState.currentIndex > 0) {
-            this.sliderState.currentIndex -= 1;
-        }
-
-        this.setPositionByIndex();
-        this.track.style.cursor = 'grab';
-    }
-
-    getPositionX(event) {
-        return event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
-    }
-
-    animate() {
-        this.setSliderPosition();
-        if (this.sliderState.isDragging) {
-            requestAnimationFrame(this.animate.bind(this));
-        }
-    }
-
-    setSliderPosition() {
-        this.track.style.transform = `translateX(${this.sliderState.currentTranslate}px)`;
-    }
-
-    setPositionByIndex() {
-        this.sliderState.currentTranslate = -this.sliderState.currentIndex * this.cards[0].offsetWidth;
-        this.sliderState.previousTranslate = this.sliderState.currentTranslate;
-        this.track.style.transition = 'transform 0.5s ease-out';
-        this.setSliderPosition();
-        this.updateDots();
-        this.updateButtons();
-    }
-
-    // Scroll Button Methods
-    createScrollButton() {
-        this.scrollTopButton = document.createElement('button');
-        this.scrollTopButton.className = 'scroll-to-top';
-        this.scrollTopButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
-        document.body.appendChild(this.scrollTopButton);
-    }
-
-    handleScroll() {
-        if (window.scrollY > 300) {
-            this.scrollTopButton.classList.add('visible');
-        } else {
-            this.scrollTopButton.classList.remove('visible');
-        }
-    }
-
-    scrollToTop() {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    }
-
-    // Form Methods
-    handleFormSubmit(e) {
-        e.preventDefault();
-
-        let isValid = true;
-        const formInputs = this.contactForm.querySelectorAll('input[required], textarea[required]');
-
-        formInputs.forEach(input => {
-            if (!input.value.trim()) {
-                input.classList.add('error');
-                isValid = false;
-            } else {
-                input.classList.remove('error');
+        // Testimonial Components
+        this.testimonials = {
+            container: document.querySelector('.testimonial-container'),
+            track: document.querySelector('.testimonial-track'),
+            cards: Array.from(document.querySelectorAll('.testimonial-card')),
+            controls: {
+                prev: document.querySelector('.prev-btn'),
+                next: document.querySelector('.next-btn'),
+                dots: document.querySelector('.slider-dots')
+            },
+            state: {
+                currentIndex: 0,
+                isAnimating: false,
+                isDragging: false,
+                startX: 0,
+                currentTranslate: 0,
+                previousTranslate: 0,
+                autoPlayInterval: null
             }
-        });
+        };
 
-        if (isValid) {
-            alert('Form submitted successfully!');
-            this.contactForm.reset();
-        } else {
-            alert('Please fill out all required fields.');
+        // Form Components
+        this.form = {
+            element: document.getElementById('contact-form'),
+            inputs: document.querySelectorAll('input, textarea'),
+            submitButton: document.querySelector('#contact-form button[type="submit"]')
+        };
+
+        // Initialize Premium Features
+        await this.initializePremiumFeatures();
+    }
+
+    async initializePremiumFeatures() {
+        // Smooth Scroll Polyfill
+        if (!('scrollBehavior' in document.documentElement.style)) {
+            await import('smoothscroll-polyfill').then(module => module.polyfill());
         }
+
+        // Create Premium UI Elements
+        this.createPremiumUIElements();
+
+        // Initialize Animations
+        this.initializeAnimations();
     }
 
-    // Smooth Scrolling
-    setupSmoothScrolling() {
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', (e) => {
-                const href = anchor.getAttribute('href');
-                if (href === '#' || href === '') return;
+    createPremiumUIElements() {
+        // Create Scroll Progress Indicator
+        this.scrollProgress = document.createElement('div');
+        this.scrollProgress.className = 'scroll-progress';
+        document.body.appendChild(this.scrollProgress);
 
-                const target = document.querySelector(href);
-                if (target) {
-                    e.preventDefault();
-                    const headerOffset = document.querySelector('.site-header').offsetHeight;
-                    const elementPosition = target.offsetTop - headerOffset;
+        // Create Premium Scroll Button
+        this.scrollButton = document.createElement('button');
+        this.scrollButton.className = 'scroll-to-top premium-effect';
+        this.scrollButton.innerHTML = `
+            <div class="scroll-button-background"></div>
+            <i class="fas fa-arrow-up"></i>
+        `;
+        document.body.appendChild(this.scrollButton);
 
-                    window.scrollTo({
-                        top: elementPosition,
-                        behavior: 'smooth'
-                    });
-                }
-            });
+        // Create Loading Overlay
+        this.createLoadingOverlay();
+    }
+
+    createLoadingOverlay() {
+        const overlay = document.createElement('div');
+        overlay.className = 'premium-loading-overlay';
+        overlay.innerHTML = `
+            <div class="loading-content">
+                <svg class="premium-spinner" viewBox="0 0 50 50">
+                    <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                </svg>
+                <div class="loading-text">
+                    <span>L</span><span>o</span><span>a</span><span>d</span><span>i</span><span>n</span><span>g</span>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    initializeAnimations() {
+        // Intersection Observer for Animation on Scroll
+        this.animationObserver = new IntersectionObserver(
+            (entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in');
+                        if (entry.target.dataset.animationSequence) {
+                            this.triggerSequenceAnimation(entry.target);
+                        }
+                    }
+                });
+            },
+            {
+                threshold: 0.2,
+                rootMargin: '0px'
+            }
+        );
+
+        // Setup Animation Elements
+        document.querySelectorAll('.animate-on-scroll').forEach(element => {
+            this.animationObserver.observe(element);
         });
     }
 
-    // Event Listeners Setup
     setupEventListeners() {
-        // Form Events
-        if (this.contactForm) {
-            this.contactForm.addEventListener('submit', (e) => this.handleFormSubmit(e));
+        // Premium Scroll Handling
+        window.addEventListener('scroll', this.handlePremiumScroll.bind(this), { passive: true });
+        
+        // Responsive Design Handling
+        window.addEventListener('resize', this.debounce(this.handleResize.bind(this), 250));
+        
+        // Touch Events for Mobile
+        if ('ontouchstart' in window) {
+            this.setupTouchEvents();
         }
 
-        // Scroll Events
-        window.addEventListener('scroll', () => this.handleScroll());
-        this.scrollTopButton.addEventListener('click', () => this.scrollToTop());
+        // Premium Button Events
+        this.scrollButton.addEventListener('click', () => {
+            this.smoothScrollTop();
+            this.triggerButtonAnimation(this.scrollButton);
+        });
 
-        // Window Resize
-        window.addEventListener('resize', () => this.initSlider());
+        // Form Enhancement
+        if (this.form.element) {
+            this.setupEnhancedForm();
+        }
 
-        // Smooth Scrolling
-        this.setupSmoothScrolling();
+        // Testimonial Controls
+        if (this.testimonials.container) {
+            this.setupTestimonialControls();
+        }
+    }
+
+    setupTouchEvents() {
+        const touchElements = [this.testimonials.track, document.body];
+        
+        touchElements.forEach(element => {
+            if (!element) return;
+
+            element.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: true });
+            element.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+            element.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: true });
+        });
+    }
+
+    setupEnhancedForm() {
+        // Enhanced Form Validation
+        this.form.inputs.forEach(input => {
+            input.addEventListener('focus', () => this.handleInputFocus(input));
+            input.addEventListener('blur', () => this.handleInputBlur(input));
+            input.addEventListener('input', () => this.handleInputValidation(input));
+        });
+
+        // Form Submission
+        this.form.element.addEventListener('submit', (e) => this.handleEnhancedSubmit(e));
+    }
+
+    setupTestimonialControls() {
+        const { controls, state } = this.testimonials;
+
+        // Enhanced Controls
+        if (controls.prev) controls.prev.addEventListener('click', () => this.previousSlide());
+        if (controls.next) controls.next.addEventListener('click', () => this.nextSlide());
+
+        // Auto-play with Pause on Hover
+        this.testimonials.container.addEventListener('mouseenter', () => this.pauseAutoPlay());
+        this.testimonials.container.addEventListener('mouseleave', () => this.resumeAutoPlay());
+
+        // Initialize Dots
+        this.createEnhancedDots();
+    }// Premium Animation Methods
+    handlePremiumScroll() {
+        if (this.scrollTimeout) {
+            window.cancelAnimationFrame(this.scrollTimeout);
+        }
+
+        this.scrollTimeout = window.requestAnimationFrame(() => {
+            const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+            this.scrollProgress.style.width = `${scrollPercent}%`;
+            
+            // Show/Hide Scroll Button with Premium Animation
+            if (window.scrollY > window.innerHeight / 2) {
+                this.scrollButton.classList.add('visible', 'premium-effect');
+            } else {
+                this.scrollButton.classList.remove('visible');
+            }
+
+            // Parallax Effects
+            this.updateParallaxElements();
+            
+            // Header Transformation
+            this.updateHeaderOnScroll();
+        });
+    }
+
+    updateParallaxElements() {
+        const parallaxElements = document.querySelectorAll('[data-parallax]');
+        parallaxElements.forEach(element => {
+            const speed = element.dataset.parallax || 0.5;
+            const yPos = -(window.scrollY * speed);
+            element.style.transform = `translate3d(0, ${yPos}px, 0)`;
+        });
+    }
+
+    updateHeaderOnScroll() {
+        const header = document.querySelector('.site-header');
+        if (!header) return;
+
+        const currentScroll = window.scrollY;
+        const scrollDelta = currentScroll - this.lastScrollPosition;
+        
+        if (currentScroll > 100) {
+            if (scrollDelta > 0 && !this.state.isMobile) {
+                header.classList.add('header-hidden');
+            } else {
+                header.classList.remove('header-hidden');
+            }
+            header.classList.add('header-scrolled');
+        } else {
+            header.classList.remove('header-scrolled', 'header-hidden');
+        }
+
+        this.lastScrollPosition = currentScroll;
+    }
+
+    // Enhanced Testimonial Slider
+    setupTestimonialSlider() {
+        if (!this.testimonials.track) return;
+
+        this.testimonials.state = {
+            ...this.testimonials.state,
+            slideWidth: this.testimonials.cards[0].offsetWidth,
+            totalSlides: this.testimonials.cards.length,
+            autoPlayDelay: 5000,
+            transitionDuration: 500
+        };
+
+        // Initialize Slider Position
+        this.updateSliderPosition(true);
+        
+        // Start Auto-play
+        this.startAutoPlay();
+
+        // Add Premium Touch Interactions
+        this.setupPremiumTouchInteractions();
+    }
+
+    setupPremiumTouchInteractions() {
+        const { track } = this.testimonials;
+        let touchStartTime;
+        let touchEndTime;
+
+        const handleTouchStart = (e) => {
+            touchStartTime = Date.now();
+            this.testimonials.state.isDragging = true;
+            this.testimonials.state.startX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+            track.style.transition = 'none';
+            this.pauseAutoPlay();
+        };
+
+        const handleTouchMove = (e) => {
+            if (!this.testimonials.state.isDragging) return;
+            
+            e.preventDefault();
+            const currentPosition = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+            const diff = currentPosition - this.testimonials.state.startX;
+            
+            const translate = this.testimonials.state.currentTranslate + diff;
+            this.setSliderPosition(translate);
+        };
+
+        const handleTouchEnd = () => {
+            touchEndTime = Date.now();
+            const touchDuration = touchEndTime - touchStartTime;
+            
+            this.testimonials.state.isDragging = false;
+            track.style.transition = `transform ${this.testimonials.state.transitionDuration}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+            
+            this.snapToNearestSlide(touchDuration);
+            this.resumeAutoPlay();
+        };
+
+        // Add Event Listeners with Passive Option for Better Performance
+        track.addEventListener('touchstart', handleTouchStart, { passive: true });
+        track.addEventListener('touchmove', handleTouchMove, { passive: false });
+        track.addEventListener('touchend', handleTouchEnd, { passive: true });
+        track.addEventListener('mousedown', handleTouchStart, { passive: true });
+        track.addEventListener('mousemove', handleTouchMove, { passive: false });
+        track.addEventListener('mouseup', handleTouchEnd, { passive: true });
+        track.addEventListener('mouseleave', handleTouchEnd, { passive: true });
+    }
+
+    snapToNearestSlide(touchDuration) {
+        const { currentTranslate, slideWidth } = this.testimonials.state;
+        const movePercentage = Math.abs(currentTranslate - this.testimonials.state.previousTranslate) / slideWidth;
+        
+        let targetIndex = this.testimonials.state.currentIndex;
+        
+        if (movePercentage > 0.2 || touchDuration < 300) {
+            if (currentTranslate < this.testimonials.state.previousTranslate) {
+                targetIndex = Math.min(targetIndex + 1, this.testimonials.cards.length - 1);
+            } else {
+                targetIndex = Math.max(targetIndex - 1, 0);
+            }
+        }
+
+        this.goToSlide(targetIndex);
+    }
+
+    // Premium Form Handling
+    setupEnhancedForm() {
+        if (!this.form.element) return;
+
+        // Add floating labels
+        this.form.inputs.forEach(input => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'form-field-wrapper';
+            
+            const label = document.createElement('label');
+            label.textContent = input.placeholder;
+            input.placeholder = '';
+            
+            input.parentNode.insertBefore(wrapper, input);
+            wrapper.appendChild(input);
+            wrapper.appendChild(label);
+        });
+
+        // Enhanced validation
+        this.form.element.addEventListener('submit', this.handleFormSubmit.bind(this));
+    }
+
+    async handleFormSubmit(e) {
+        e.preventDefault();
+        
+        if (!this.validateForm()) return;
+
+        this.showLoadingState();
+        
+        try {
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            this.showSuccessMessage();
+            this.form.element.reset();
+        } catch (error) {
+            this.showErrorMessage();
+        } finally {
+            this.hideLoadingState();
+        }
+    }
+
+    // Premium Loading Sequence
+    async handleInitialLoad() {
+        document.body.style.overflow = 'hidden';
+        
+        // Preload critical images
+        await this.preloadCriticalImages();
+
+        // Animate loader out
+        const loader = document.querySelector('.loader-container');
+        const content = document.querySelector('.content-container');
+
+        setTimeout(() => {
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+                content.style.opacity = '1';
+                document.body.style.overflow = '';
+                
+                // Trigger initial animations
+                this.triggerInitialAnimations();
+            }, 500);
+        }, 1000);
+    }
+
+    // Animation Utilities
+    triggerInitialAnimations() {
+        const elements = document.querySelectorAll('.animate-on-load');
+        elements.forEach((el, index) => {
+            setTimeout(() => {
+                el.classList.add('visible');
+            }, index * 100);
+        });
+    }
+
+    // Utility Methods
+    debounce(func, wait) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
+    // Error Handling
+    handleError(error, context) {
+        console.error(`Error in ${context}:`, error);
+        // Implement error tracking/reporting here
     }
 }
 
-// Initialize Site
+// Initialize Premium Site
 document.addEventListener('DOMContentLoaded', () => {
-    // Add Interactive Styles
+    // Add Premium Styles
     const style = document.createElement('style');
-    style.innerHTML = `
-        .error {
-            border: 2px solid #e74c3c;
-            animation: shake 0.3s ease;
+    style.textContent = `
+        .premium-effect {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-        }
-
-        .scroll-to-top {
+        
+        .scroll-progress {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background-color: #000000;
-            color: #fff;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 50%;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            z-index: 1000;
+            transition: width 0.1s ease;
+        }
+
+        .premium-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            z-index: 9999;
             opacity: 0;
             visibility: hidden;
-            z-index: 1000;
+            transition: all 0.3s ease;
         }
 
-        .scroll-to-top.visible {
-            opacity: 1;
-            visibility: visible;
+        .loading-content {
+            text-align: center;
+            color: white;
         }
 
-        .scroll-to-top:hover {
-            background-color: #333333;
-            transform: scale(1.1);
+        .premium-spinner {
+            width: 50px;
+            height: 50px;
+            animation: rotate 2s linear infinite;
+        }
+
+        .premium-spinner .path {
+            stroke: var(--primary);
+            stroke-linecap: round;
+            animation: dash 1.5s ease-in-out infinite;
+        }
+
+        @keyframes rotate {
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes dash {
+            0% {
+                stroke-dasharray: 1, 150;
+                stroke-dashoffset: 0;
+            }
+            50% {
+                stroke-dasharray: 90, 150;
+                stroke-dashoffset: -35;
+            }
+            100% {
+                stroke-dasharray: 90, 150;
+                stroke-dashoffset: -124;
+            }
         }
     `;
     document.head.appendChild(style);
 
-    // Initialize Site Manager
-    new SiteManager();
-
-    // Initialize Header Controller
-    new HeaderController();
+    // Initialize Site
+    window.premiumSite = new PremiumSiteManager();
 });
-
-// Header Controller Class
-class HeaderController {
-    constructor() {
-        this.header = document.querySelector('.site-header');
-        this.mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
-        this.navContainer = document.querySelector('.nav-container');
-        this.headerHeight = this.header.offsetHeight;
-        this.lastScroll = 0;
-        this.isMenuOpen = false;
-        this.isScrolling = false;
-        
-        this.init();
-    }
-
-    init() {
-        this.setupEventListeners();
-        this.setupIntersectionObserver();
-        this.setupScrollThrottle();
-    }
-
-    setupEventListeners() {
-        // Mobile Menu Toggle
-        this.mobileMenuToggle.addEventListener('click', () => this.toggleMobileMenu());
-
-        // Close menu when clicking outside
-        document.addEventListener('click', (e) => this.handleOutsideClick(e));
-
-        // Smooth scroll navigation
-        document.querySelectorAll('.nav-links a, .cta-button').forEach(link => {
-            link.addEventListener('click', (e) => this.handleNavClick(e, link));
-        });
-
-        // Handle resize events
-        window.addEventListener('resize', this.debounce(() => this.handleResize(), 250));
-
-        // Handle escape key
-        document.addEventListener('keydown', (e) => this.handleEscapeKey(e));
-    }
-
-    setupIntersectionObserver() {
-        const options = {
-            rootMargin: '-100px 0px 0px 0px',
-            threshold: [0]
-        };
-
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (!entry.isIntersecting) {
-                    this.header.classList.add('sticky');
-                } else {
-                    this.header.classList.remove('sticky');
-                }
-            });
-        }, options);
-
-        // Observe a sentinel element at the top of the page
-        const sentinel = document.createElement('div');
-        sentinel.classList.add('scroll-sentinel');
-        document.body.prepend(sentinel);
-        observer.observe(sentinel);
-    }
-
-    setupScrollThrottle() {
-        let ticking = false;
-
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    this.handleScroll();
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        });
-    }
-
-    handleScroll() {
-        const currentScroll = window.pageYOffset;
-        
-        if (currentScroll > this.headerHeight) {
-            if (currentScroll > this.lastScroll && currentScroll > this.headerHeight) {
-                // Scrolling down
-                this.header.style.transform = 'translateY(-100%)';
-            } else {
-                // Scrolling up
-                this.header.style.transform = 'translateY(0)';
-            }
-        } else {
-            this.header.classList.remove('sticky');
-            this.header.style.transform = 'translateY(0)';
-        }
-        
-        this.lastScroll = currentScroll;
-    }
-
-    toggleMobileMenu() {
-        this.isMenuOpen = !this.isMenuOpen;
-        this.navContainer.classList.toggle('active');
-        this.mobileMenuToggle.classList.toggle('active');
-        document.body.style.overflow = this.isMenuOpen ? 'hidden' : '';
-    }
-
-    handleOutsideClick(e) {
-        if (this.isMenuOpen && !this.navContainer.contains(e.target) && !this.mobileMenuToggle.contains(e.target)) {
-            this.toggleMobileMenu();
-        }
-    }
-
-    handleNavClick(e, link) {
-        const target = document.querySelector(link.getAttribute('href'));
-        if (target) {
-            e.preventDefault();
-            const headerOffset = this.header.offsetHeight;
-            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
-            
-            window.scrollTo({
-                top: targetPosition,
-                behavior: 'smooth'
-            });
-
-            if (this.isMenuOpen) {
-                this.toggleMobileMenu();
-            }
-        }
-    }
-
-    handleResize() {
-        if (window.innerWidth > 768 && this.isMenuOpen) {
-            this.toggleMobileMenu();
-        }
-        this.headerHeight = this.header.offsetHeight;
-    }
-
-    handleEscapeKey(e) {
-        if (e.key === 'Escape' && this.isMenuOpen) {
-            this.toggleMobileMenu();
-        }
-    }
-
-    debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-}
