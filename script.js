@@ -516,3 +516,62 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Site Manager
     new PremiumSiteManager();
 });
+
+// Parallax effect for background circles
+    document.addEventListener('mousemove', (e) => {
+      const circles = document.querySelectorAll('.circle');
+      const mouseX = e.clientX / window.innerWidth;
+      const mouseY = e.clientY / window.innerHeight;
+
+      circles.forEach((circle) => {
+        const rect = circle.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        const moveX = (mouseX - 0.5) * 20;
+        const moveY = (mouseY - 0.5) * 20;
+
+        circle.style.transform = `translate(${moveX}px, ${moveY}px)`;
+      });
+    });
+
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+      threshold: 0.2,
+      rootMargin: '0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.visibility = 'visible';
+        }
+      });
+    }, observerOptions);
+
+    // Observe benefit cards for scroll animations
+    document.querySelectorAll('.benefit-card').forEach(card => {
+      observer.observe(card);
+    });
+
+    // Add hover effect sound for benefit cards
+    document.querySelectorAll('.benefit-card').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        if (window.AudioContext || window.webkitAudioContext) {
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          oscillator.type = 'sine';
+          oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+          gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+          
+          oscillator.start();
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+          oscillator.stop(audioContext.currentTime + 0.1);
+        }
+      });
+    });
