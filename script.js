@@ -12,7 +12,7 @@ class PremiumSiteManager {
             container: null,
             track: null,
             cards: [],
-            currentIndex: 1,
+            currentIndex: 1, // Start from 1 due to cloning for infinite scroll
             isAnimating: false,
             cardWidth: 0,
             totalSlides: 0,
@@ -29,9 +29,8 @@ class PremiumSiteManager {
     async init() {
         try {
             await this.initializeComponents();
-            // Commenting out the testimonial initialization for simplification
-            // this.initializeTestimonials();
-            // this.setupEventListeners();
+            this.initializeTestimonials(); // Initialize testimonials
+            this.setupEventListeners();
             await this.preloadImages();
             this.handleInitialLoad();
             this.state.initialized = true;
@@ -154,6 +153,144 @@ class PremiumSiteManager {
             clearTimeout(timeout);
             timeout = setTimeout(() => func.apply(context, args), wait);
         };
+    }
+
+    // --------------------------
+    // Testimonials Methods
+    // --------------------------
+
+    initializeTestimonials() {
+        // Select testimonial elements
+        const testimonialContainer = document.querySelector('.testimonial-container');
+        const testimonialTrack = testimonialContainer.querySelector('.testimonial-track');
+        const testimonialCards = Array.from(testimonialTrack.children);
+
+        // Clone first and last slides for infinite effect
+        const firstClone = testimonialCards[0].cloneNode(true);
+        const lastClone = testimonialCards[testimonialCards.length - 1].cloneNode(true);
+
+        testimonialTrack.appendChild(firstClone);
+        testimonialTrack.insertBefore(lastClone, testimonialCards[0]);
+
+        // Update testimonial state
+        this.testimonials.container = testimonialContainer;
+        this.testimonials.track = testimonialTrack;
+        this.testimonials.cards = Array.from(testimonialTrack.children);
+        this.testimonials.totalSlides = this.testimonials.cards.length;
+        this.testimonials.cardWidth = this.testimonials.cards[0].getBoundingClientRect().width;
+
+        // Set initial position
+        this.testimonials.track.style.transform = `translateX(-${this.testimonials.cardWidth * this.testimonials.currentIndex}px)`;
+
+        // Handle window resize
+        window.addEventListener('resize', this.debounce(() => {
+            this.updateCardWidth();
+        }, 250));
+    }
+
+    updateCardWidth() {
+        this.testimonials.cardWidth = this.testimonials.cards[0].getBoundingClientRect().width;
+        this.testimonials.track.style.transition = 'none';
+        this.testimonials.track.style.transform = `translateX(-${this.testimonials.cardWidth * this.testimonials.currentIndex}px)`;
+    }
+
+    setupEventListeners() {
+        // Existing event listeners...
+
+        // Testimonial Navigation Buttons
+        const prevBtn = document.querySelector('.prev-btn');
+        const nextBtn = document.querySelector('.next-btn');
+
+        if (prevBtn && nextBtn) {
+            prevBtn.addEventListener('click', () => this.moveToPrevSlide());
+            nextBtn.addEventListener('click', () => this.moveToNextSlide());
+        }
+
+        // Transition End Event for Infinite Scroll
+        if (this.testimonials.track) {
+            this.testimonials.track.addEventListener('transitionend', () => this.handleTransitionEnd());
+        }
+
+        // Optional: Touch Events for Swipe (Mobile)
+        this.testimonials.track.addEventListener('touchstart', (e) => this.touchStart(e), { passive: true });
+        this.testimonials.track.addEventListener('touchmove', (e) => this.touchMove(e), { passive: true });
+        this.testimonials.track.addEventListener('touchend', () => this.touchEnd());
+    }
+
+    moveToPrevSlide() {
+        if (this.testimonials.isAnimating) return;
+        this.testimonials.isAnimating = true;
+        this.testimonials.currentIndex--;
+        this.updateSlidePosition();
+    }
+
+    moveToNextSlide() {
+        if (this.testimonials.isAnimating) return;
+        this.testimonials.isAnimating = true;
+        this.testimonials.currentIndex++;
+        this.updateSlidePosition();
+    }
+
+    updateSlidePosition() {
+        this.testimonials.track.style.transition = 'transform 0.5s ease-in-out';
+        this.testimonials.track.style.transform = `translateX(-${this.testimonials.cardWidth * this.testimonials.currentIndex}px)`;
+    }
+
+    handleTransitionEnd() {
+        this.testimonials.isAnimating = false;
+        if (this.testimonials.currentIndex === 0) {
+            // Jump to the last real slide
+            this.testimonials.track.style.transition = 'none';
+            this.testimonials.currentIndex = this.testimonials.totalSlides - 2;
+            this.testimonials.track.style.transform = `translateX(-${this.testimonials.cardWidth * this.testimonials.currentIndex}px)`;
+        }
+
+        if (this.testimonials.currentIndex === this.testimonials.totalSlides - 1) {
+            // Jump to the first real slide
+            this.testimonials.track.style.transition = 'none';
+            this.testimonials.currentIndex = 1;
+            this.testimonials.track.style.transform = `translateX(-${this.testimonials.cardWidth * this.testimonials.currentIndex}px)`;
+        }
+    }
+
+    // Touch Events for Swipe (Optional)
+    touchStart(event) {
+        this.testimonials.touchStartX = event.touches[0].clientX;
+        this.testimonials.touchCurrentX = this.testimonials.touchStartX;
+        this.testimonials.track.style.transition = 'none';
+    }
+
+    touchMove(event) {
+        if (!this.testimonials.touchStartX) return;
+        this.testimonials.touchCurrentX = event.touches[0].clientX;
+        const moveX = this.testimonials.touchCurrentX - this.testimonials.touchStartX;
+        this.testimonials.track.style.transform = `translateX(-${this.testimonials.cardWidth * this.testimonials.currentIndex - moveX}px)`;
+    }
+
+    touchEnd() {
+        if (!this.testimonials.touchStartX || !this.testimonials.touchCurrentX) {
+            this.resetPosition();
+            return;
+        }
+
+        const moveX = this.testimonials.touchCurrentX - this.testimonials.touchStartX;
+        if (Math.abs(moveX) > this.testimonials.cardWidth * 0.2) {
+            if (moveX < 0) {
+                this.moveToNextSlide();
+            } else {
+                this.moveToPrevSlide();
+            }
+        } else {
+            this.resetPosition();
+        }
+
+        this.testimonials.touchStartX = null;
+        this.testimonials.touchCurrentX = null;
+    }
+
+    resetPosition() {
+        this.testimonials.track.style.transition = 'transform 0.5s ease-in-out';
+        this.testimonials.track.style.transform = `translateX(-${this.testimonials.cardWidth * this.testimonials.currentIndex}px)`;
     }
 }
 
