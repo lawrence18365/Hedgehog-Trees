@@ -1741,23 +1741,51 @@ padding-top: calc(var(--header-height) + var(--top-bar-height));
     }
 }
 
-@media (max-width: 480px) {
-    .testimonials-section {
-        padding: 60px 0;
+/* Mobile Testimonials Fixes */
+@media (max-width: 768px) {
+    .testimonial-container {
+        width: 90vw;
+        margin: 0 auto;
+        padding: 0;
     }
-
+    
+    .testimonial-track {
+        gap: 0;
+        padding: 0 5vw;
+    }
+    
     .testimonial-card {
-        min-height: 450px;
-        padding: 24px;
+        min-width: 90vw;
+        flex: 0 0 90vw;
+        margin: 0;
+        height: auto;
+        min-height: fit-content;
+        padding: 30px;
     }
-
-    .testimonial-details {
-        grid-template-columns: 1fr;
+    
+    .testimonial-text {
+        max-height: none;
+        min-height: auto;
+        -webkit-line-clamp: none;
+        overflow: visible;
+        margin: 20px 0;
     }
+    
+    .testimonial-footer {
+        margin-top: 20px;
+    }
+}
 
-    .testimonial-service {
-        padding-left: 0;
-        border-left: none;
+/* Fix for iOS scroll snapping */
+@media (max-width: 768px) {
+    .testimonial-container {
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .testimonial-card {
+        scroll-snap-align: center;
+        scroll-snap-stop: always;
     }
 }
 /* Responsive Design */
