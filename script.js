@@ -298,3 +298,19 @@ class PremiumSiteManager {
 window.addEventListener('DOMContentLoaded', () => {
     window.premiumSite = new PremiumSiteManager();
 });
+// Add this to your existing JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const header = document.querySelector('.site-header');
+    const scrollThreshold = 50;
+
+    function handleScroll() {
+        if (window.scrollY > scrollThreshold) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+    }
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+});
