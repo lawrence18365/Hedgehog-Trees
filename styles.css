@@ -56,6 +56,14 @@
 html {
    scroll-behavior: smooth;
 }
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    background-color: var(--background-dark);
+}
 
 body {
    font-family: var(--font-primary);
@@ -119,10 +127,10 @@ body {
 }
 
 .content-container {
-   position: relative;
-   min-height: 100vh;
-   opacity: 0;
-   transition: opacity 0.5s ease-out;
+    min-height: 100%;
+    position: relative;
+    background-color: var(--background-dark);
+    overflow: hidden;
 }
 
 .content-container.loaded {
@@ -2354,10 +2362,12 @@ padding-top: calc(var(--header-height) + var(--top-bar-height));
 /* Footer */
 /* Footer */
 .footer {
-   background: var(--primary-dark);
-   color: var(--text-light);
-   position: relative;
-   overflow: hidden;
+    position: relative;
+    width: 100%;
+    bottom: 0;
+    background: var(--primary-dark);
+    margin-top: 0;
+    padding-bottom: 0;
 }
 
 .footer::before {
@@ -2370,12 +2380,34 @@ padding-top: calc(var(--header-height) + var(--top-bar-height));
    background: linear-gradient(90deg, transparent, var(--accent), transparent);
    opacity: 0.1;
 }
-
-.footer-content {
-   padding: 80px 0 40px;
-   position: relative;
+main {
+    background-color: var(--background-dark);
+    position: relative;
+    z-index: 1;
+}
+.footer::after {
+    content: '';
+    display: table;
+    clear: both;
 }
 
+.footer-content {
+    padding-bottom: 40px;
+    margin-bottom: 0;
+}
+/* Clear Browser Default Margins */
+* {
+    margin-bottom: 0;
+}
+/* Fix for Mobile Viewport Height Issues */
+@media screen and (max-width: 768px) {
+    body {
+        min-height: -webkit-fill-available;
+    }
+    html {
+        height: -webkit-fill-available;
+    }
+}
 .footer-grid {
    display: grid;
    grid-template-columns: 2fr 1fr 1fr 1fr;
@@ -2486,10 +2518,10 @@ padding-top: calc(var(--header-height) + var(--top-bar-height));
    justify-content: center;
 }
 
+/* Remove Any Potential Bottom Spacing */
 .footer-bottom {
-   border-top: 1px solid rgba(255, 255, 255, 0.1);
-   padding: 30px 0;
-   margin-top: 60px;
+    margin-bottom: 0;
+    padding-bottom: 30px;
 }
 
 .footer-bottom .container {
