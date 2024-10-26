@@ -314,3 +314,42 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('scroll', handleScroll);
     handleScroll(); // Initial check
 });
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.innerWidth <= 768) {
+        const track = document.querySelector('.testimonial-track');
+        const cards = document.querySelectorAll('.testimonial-card');
+        const prevBtn = document.querySelector('.prev-btn');
+        const nextBtn = document.querySelector('.next-btn');
+        let currentIndex = 0;
+
+        function updateSlidePosition() {
+            const cardWidth = cards[0].offsetWidth;
+            const offset = cardWidth * currentIndex;
+            track.style.transform = `translateX(-${offset}px)`;
+        }
+
+        function moveToSlide(index) {
+            if (index < 0 || index >= cards.length) return;
+            currentIndex = index;
+            updateSlidePosition();
+        }
+
+        prevBtn?.addEventListener('click', () => {
+            moveToSlide(currentIndex - 1);
+        });
+
+        nextBtn?.addEventListener('click', () => {
+            moveToSlide(currentIndex + 1);
+        });
+
+        // Ensure proper positioning after resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                updateSlidePosition();
+            }
+        });
+
+        // Initial position
+        updateSlidePosition();
+    }
+});
