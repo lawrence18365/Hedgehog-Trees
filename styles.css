@@ -541,7 +541,7 @@ padding-top: calc(var(--header-height) + var(--top-bar-height));
 
 .about-section {
       padding: 6rem 1rem;
-      background: linear-gradient(180deg, var(--bg-light) 0%, white 100%);
+      background: white;
       overflow: hidden;
     }
 
@@ -1434,7 +1434,7 @@ padding-top: calc(var(--header-height) + var(--top-bar-height));
 /* Testimonials Section */
 .testimonials-section {
     padding: 85px 0;
-    background: linear-gradient(180deg, var(--white) 0%, var(--gray-50) 100%);
+    background: white;
     position: relative;
     overflow: hidden;
 }
