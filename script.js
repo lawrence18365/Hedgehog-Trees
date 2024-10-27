@@ -8,7 +8,6 @@ class PremiumSiteManager {
 
         this.testimonials = {
             container: null,
-            viewport: null,
             track: null,
             cards: [],
             currentIndex: 1,
@@ -18,8 +17,7 @@ class PremiumSiteManager {
             touchStartX: null,
             touchCurrentX: null,
             currentTranslate: 0,
-            gap: 30,
-            padding: 20
+            gap: 30
         };
 
         this.loadingTimeout = setTimeout(() => this.forceRemoveLoader(), 5000);
@@ -96,10 +94,10 @@ class PremiumSiteManager {
     createDefaultLoader() {
         const loaderContainer = document.createElement('div');
         loaderContainer.className = 'loader-container';
-
+        
         const loaderContent = document.createElement('div');
         loaderContent.className = 'loader-content';
-
+        
         const spinner = document.createElement('div');
         spinner.className = 'spinner';
         spinner.innerHTML = `
@@ -166,51 +164,37 @@ class PremiumSiteManager {
         this.testimonials.totalSlides = this.testimonials.cards.length;
 
         // Set initial styles
-        testimonialContainer.style.boxSizing = 'border-box';
-        testimonialContainer.style.overflow = 'hidden';
-        testimonialContainer.style.width = '100%';
         testimonialTrack.style.display = 'flex';
         testimonialTrack.style.gap = `${this.testimonials.gap}px`;
 
-        this.testimonials.cards.forEach(card => {
-            card.style.flexShrink = '0';
-        });
-        
         this.updateCardWidth();
+        
         window.addEventListener('resize', this.debounce(() => {
             this.updateCardWidth();
         }, 250));
     }
 
     updateCardWidth() {
-        const containerWidth = this.testimonials.container.offsetWidth - (this.testimonials.padding * 2);
-        
+        const containerWidth = this.testimonials.container.offsetWidth;
+
         if (window.innerWidth <= 768) {
-            this.testimonials.cardWidth = containerWidth;
+            this.testimonials.cardWidth = containerWidth - 40;
         } else {
-            const totalGaps = 2;
-            const availableWidth = containerWidth - (this.testimonials.gap * totalGaps);
+            const availableWidth = containerWidth - (this.testimonials.gap * 2);
             this.testimonials.cardWidth = availableWidth / 3;
         }
 
+        // Set widths and create track width
         this.testimonials.cards.forEach(card => {
             card.style.width = `${this.testimonials.cardWidth}px`;
             card.style.minWidth = `${this.testimonials.cardWidth}px`;
+            card.style.flexShrink = '0';
         });
-
-        const trackWidth = (this.testimonials.cardWidth * this.testimonials.cards.length) + 
-                          (this.testimonials.gap * (this.testimonials.cards.length - 1));
-        this.testimonials.track.style.width = `${trackWidth}px`;
 
         const position = -(this.testimonials.currentIndex * (this.testimonials.cardWidth + this.testimonials.gap));
         this.testimonials.track.style.transition = 'none';
         this.testimonials.track.style.transform = `translateX(${position}px)`;
-
-        // Force reflow
         this.testimonials.track.getBoundingClientRect();
-
-        this.testimonials.container.style.paddingLeft = `${this.testimonials.padding}px`;
-        this.testimonials.container.style.paddingRight = `${this.testimonials.padding}px`;
     }
 
     setupEventListeners() {
