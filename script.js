@@ -8,6 +8,7 @@ class PremiumSiteManager {
 
         this.testimonials = {
             container: null,
+            viewport: null,
             track: null,
             cards: [],
             currentIndex: 1,
@@ -16,7 +17,9 @@ class PremiumSiteManager {
             totalSlides: 0,
             touchStartX: null,
             touchCurrentX: null,
-            currentTranslate: 0
+            currentTranslate: 0,
+            gap: 30,
+            padding: 20
         };
 
         this.loadingTimeout = setTimeout(() => this.forceRemoveLoader(), 5000);
@@ -161,6 +164,17 @@ class PremiumSiteManager {
         this.testimonials.track = testimonialTrack;
         this.testimonials.cards = Array.from(testimonialTrack.children);
         this.testimonials.totalSlides = this.testimonials.cards.length;
+
+        // Set initial styles
+        testimonialContainer.style.boxSizing = 'border-box';
+        testimonialContainer.style.overflow = 'hidden';
+        testimonialContainer.style.width = '100%';
+        testimonialTrack.style.display = 'flex';
+        testimonialTrack.style.gap = `${this.testimonials.gap}px`;
+
+        this.testimonials.cards.forEach(card => {
+            card.style.flexShrink = '0';
+        });
         
         this.updateCardWidth();
         window.addEventListener('resize', this.debounce(() => {
@@ -169,13 +183,14 @@ class PremiumSiteManager {
     }
 
     updateCardWidth() {
-        const viewportWidth = this.testimonials.container.offsetWidth;
-        const gap = 30;
-
+        const containerWidth = this.testimonials.container.offsetWidth - (this.testimonials.padding * 2);
+        
         if (window.innerWidth <= 768) {
-            this.testimonials.cardWidth = viewportWidth - 40;
+            this.testimonials.cardWidth = containerWidth;
         } else {
-            this.testimonials.cardWidth = (viewportWidth - (gap * 2)) / 3;
+            const totalGaps = 2;
+            const availableWidth = containerWidth - (this.testimonials.gap * totalGaps);
+            this.testimonials.cardWidth = availableWidth / 3;
         }
 
         this.testimonials.cards.forEach(card => {
@@ -183,10 +198,19 @@ class PremiumSiteManager {
             card.style.minWidth = `${this.testimonials.cardWidth}px`;
         });
 
-        const position = -(this.testimonials.currentIndex * (this.testimonials.cardWidth + gap));
+        const trackWidth = (this.testimonials.cardWidth * this.testimonials.cards.length) + 
+                          (this.testimonials.gap * (this.testimonials.cards.length - 1));
+        this.testimonials.track.style.width = `${trackWidth}px`;
+
+        const position = -(this.testimonials.currentIndex * (this.testimonials.cardWidth + this.testimonials.gap));
         this.testimonials.track.style.transition = 'none';
         this.testimonials.track.style.transform = `translateX(${position}px)`;
+
+        // Force reflow
         this.testimonials.track.getBoundingClientRect();
+
+        this.testimonials.container.style.paddingLeft = `${this.testimonials.padding}px`;
+        this.testimonials.container.style.paddingRight = `${this.testimonials.padding}px`;
     }
 
     setupEventListeners() {
@@ -221,27 +245,25 @@ class PremiumSiteManager {
     }
 
     updateSlidePosition() {
-        const gap = 30;
         this.testimonials.track.style.transition = 'transform 0.5s ease-in-out';
-        const position = -(this.testimonials.currentIndex * (this.testimonials.cardWidth + gap));
+        const position = -(this.testimonials.currentIndex * (this.testimonials.cardWidth + this.testimonials.gap));
         this.testimonials.track.style.transform = `translateX(${position}px)`;
     }
 
     handleTransitionEnd() {
-        const gap = 30;
         this.testimonials.isAnimating = false;
         
         if (this.testimonials.currentIndex === 0) {
             this.testimonials.track.style.transition = 'none';
             this.testimonials.currentIndex = this.testimonials.totalSlides - 2;
-            const position = -(this.testimonials.currentIndex * (this.testimonials.cardWidth + gap));
+            const position = -(this.testimonials.currentIndex * (this.testimonials.cardWidth + this.testimonials.gap));
             this.testimonials.track.style.transform = `translateX(${position}px)`;
         }
 
         if (this.testimonials.currentIndex === this.testimonials.totalSlides - 1) {
             this.testimonials.track.style.transition = 'none';
             this.testimonials.currentIndex = 1;
-            const position = -(this.testimonials.currentIndex * (this.testimonials.cardWidth + gap));
+            const position = -(this.testimonials.currentIndex * (this.testimonials.cardWidth + this.testimonials.gap));
             this.testimonials.track.style.transform = `translateX(${position}px)`;
         }
     }
@@ -256,7 +278,8 @@ class PremiumSiteManager {
         if (!this.testimonials.touchStartX) return;
         this.testimonials.touchCurrentX = event.touches[0].clientX;
         const moveX = this.testimonials.touchCurrentX - this.testimonials.touchStartX;
-        this.testimonials.track.style.transform = `translateX(-${this.testimonials.cardWidth * this.testimonials.currentIndex - moveX}px)`;
+        const position = -(this.testimonials.currentIndex * (this.testimonials.cardWidth + this.testimonials.gap)) + moveX;
+        this.testimonials.track.style.transform = `translateX(${position}px)`;
     }
 
     touchEnd() {
@@ -282,7 +305,8 @@ class PremiumSiteManager {
 
     resetPosition() {
         this.testimonials.track.style.transition = 'transform 0.5s ease-in-out';
-        this.testimonials.track.style.transform = `translateX(-${this.testimonials.cardWidth * this.testimonials.currentIndex}px)`;
+        const position = -(this.testimonials.currentIndex * (this.testimonials.cardWidth + this.testimonials.gap));
+        this.testimonials.track.style.transform = `translateX(${position}px)`;
     }
 }
 
