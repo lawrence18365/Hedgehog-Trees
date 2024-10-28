@@ -1524,23 +1524,6 @@ padding-top: calc(var(--header-height) + var(--top-bar-height));
     border-color: rgba(0,0,0,0.08);
 }
 
-.quote-icon {
-    position: absolute;
-    top: 30px;
-    right: 30px;
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--primary);
-    color: white;
-    border-radius: 50%;
-    font-size: 1.5rem;
-    opacity: 0.1;
-    transition: all 0.3s ease;
-}
-
 .testimonial-card:hover .quote-icon {
     opacity: 0.2;
     transform: scale(1.1) rotate(-10deg);
