@@ -1502,7 +1502,6 @@ justify-content: center;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--primary);
     color: white;
     border-radius: 50%;
     font-size: 1.5rem;
