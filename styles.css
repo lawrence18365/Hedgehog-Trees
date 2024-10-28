@@ -213,14 +213,9 @@ body {
    width: 28px;
    height: 28px;
    border-radius: 50%;
-   background: rgba(255, 255, 255, 0.1);
+   padding-left: 30px
 }
 
-.social-link:hover {
-   opacity: 1;
-   transform: translateY(-1px);
-   background: rgba(255, 255, 255, 0.2);
-}
 .main-nav {
     position: fixed !important;  /* Force fixed positioning */
     top: var(--top-bar-height);
