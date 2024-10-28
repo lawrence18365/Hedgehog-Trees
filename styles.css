@@ -1782,7 +1782,7 @@ padding-top: calc(var(--header-height) + var(--top-bar-height));
 
         .portfolio-section .section-subtitle {
             font-size: 1.1rem;
-            color: var(--text-dark);
+            color: white;
             opacity: 0.8;
             margin-top: 1rem;
         }
@@ -2998,4 +2998,37 @@ main {
     transform-style: preserve-3d;
     backface-visibility: hidden;
     -webkit-font-smoothing: antialiased;
+}
+
+/* Footer Link Fixes */
+.footer a,
+.footer-links a,
+.footer-legal a,
+.footer-social-link {
+    color: var(--text-light) !important;
+    text-decoration: none !important;
+    opacity: 0.7;
+}
+
+.footer a:hover,
+.footer-links a:hover,
+.footer-legal a:hover,
+.footer-social-link:hover {
+    color: var(--accent) !important;
+    opacity: 1;
+    text-decoration: none !important;
+}
+
+/* Specifically target the phone and email links to prevent blue color */
+.footer [href^="tel:"],
+.footer [href^="mailto:"] {
+    color: var(--text-light) !important;
+    text-decoration: none !important;
+    opacity: 0.7;
+}
+
+.footer [href^="tel:"]:hover,
+.footer [href^="mailto:"]:hover {
+    color: var(--accent) !important;
+    opacity: 1;
 }
