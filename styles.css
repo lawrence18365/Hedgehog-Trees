@@ -392,7 +392,25 @@ padding-top: calc(var(--header-height) + var(--top-bar-height));
    color: var(--text-light);
    z-index: 1;
 }
+@media (max-width: 768px) {
+    #hero {
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://i.postimg.cc/7LrgqvWP/image-6-1-min.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: scroll; /* Change to scroll instead of fixed for mobile */
+        background-repeat: no-repeat;
+        height: 100vh;
+    }
+}
 
+/* For iOS devices specifically */
+@supports (-webkit-touch-callout: none) {
+    #hero {
+        background-attachment: scroll;
+        /* Ensure the background stretches to full height on iOS */
+        min-height: -webkit-fill-available;
+    }
+}
 @keyframes rotateSpinner {
    0% { transform: rotate(0deg); }
    100% { transform: rotate(360deg); }
