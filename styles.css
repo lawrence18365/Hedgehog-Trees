@@ -2208,6 +2208,7 @@ main {
 .footer-content {
     padding-bottom: 40px;
     margin-bottom: 0;
+padding-top: 30px;
 }
 /* Clear Browser Default Margins */
 * {
