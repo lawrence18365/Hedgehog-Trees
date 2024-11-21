@@ -1,4 +1,4 @@
-/* Import Fonts */
+<style>/* Import Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 /* Root Variables */
@@ -578,6 +578,7 @@ padding-top: calc(var(--header-height) + var(--top-bar-height));
       position: relative;
 justify-content: center;
     display: flex;
+    text-align: center;
     }
 
     .section-title {
@@ -1925,6 +1926,7 @@ margin-top: -7%;
                 grid-template-columns: 1fr;
                 max-width: 400px;
                 margin: 0 auto;
+                margin-bottom: 30px;
             }
 
             .portfolio-section {
@@ -2090,78 +2092,178 @@ margin-top: -7%;
 }
 
 /* Mobile Optimizations */
+/* Mobile Optimizations */
 @media (max-width: 768px) {
     .contact-section {
-        padding: 40px 0;
+        padding: 20px 0 40px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
     }
 
     .contact-wrapper {
-        padding: 0 16px;
+        padding: 0 12px;
+        flex-grow: 1;
+        display: flex;
+        align-items: stretch;
     }
     
     .contact-card {
-        padding: 30px 20px;
-        border-radius: 20px;
+        padding: 24px 16px;
+        border-radius: 16px;
         background: rgba(255, 255, 255, 0.98);
+        width: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
     }
 
+    /* Header Styles */
+    .section-header {
+        margin-bottom: 24px;
+        padding: 0 16px;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+        margin-bottom: 8px;
+    }
+
+    .section-subtitle {
+        font-size: 1rem;
+    }
+
+    /* Info Grid Styles */
     .info-grid {
         grid-template-columns: 1fr;
         gap: 16px;
-        margin-bottom: 32px;
-        padding-bottom: 32px;
+        margin-bottom: 24px;
+        padding-bottom: 24px;
     }
 
     .info-item {
         background: rgba(255, 255, 255, 0.9);
-        padding: 20px;
-        border-radius: 16px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        min-height: 80px;
     }
 
     .info-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-
-    .input-wrapper {
-        margin-bottom: 24px;
-    }
-
-    .input-wrapper input,
-    .input-wrapper textarea {
-        padding: 20px;
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.95);
-        height: 60px;
-    }
-
-    .input-wrapper textarea {
-        min-height: 140px;
-        height: auto;
-    }
-
-    .submit-button {
-        height: 60px;
-        margin-top: 24px;
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
         font-size: 1.1rem;
-        border-radius: 16px;
+    }
+
+    .info-content {
+        flex-grow: 1;
     }
 
     .info-content h3 {
-        font-size: 1.1rem;
+        font-size: 1rem;
+        margin-bottom: 4px;
     }
 
     .info-content p, 
     .info-content a {
+        font-size: 0.95rem;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+
+    /* Form Styles */
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .input-wrapper {
+        margin-bottom: 20px;
+    }
+
+    .input-wrapper input,
+    .input-wrapper textarea {
+        padding: 16px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.95);
+        height: 56px;
+        font-size: 16px;
+        border: 1.5px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .input-wrapper textarea {
+        min-height: 120px;
+        padding-top: 20px;
+    }
+
+    .input-wrapper label {
+        left: 12px;
+        top: -10px;
+        font-size: 0.9rem;
+        padding: 0 8px;
+    }
+
+    /* Submit Button Styles */
+    .submit-button {
+        height: 56px;
+        margin-top: 20px;
         font-size: 1rem;
-        opacity: 0.9;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Safe Area Inset Handling for Modern Phones */
+    @supports (padding: env(safe-area-inset-bottom)) {
+        .contact-section {
+            padding-bottom: calc(40px + env(safe-area-inset-bottom));
+        }
+        
+        .submit-button {
+            margin-bottom: env(safe-area-inset-bottom);
+        }
+    }
+}
+
+/* Small Phone Optimizations */
+@media (max-width: 380px) {
+    .contact-card {
+        padding: 20px 12px;
+    }
+
+    .info-item {
+        padding: 14px;
+        min-height: 70px;
+    }
+
+    .info-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .input-wrapper input,
+    .input-wrapper textarea {
+        padding: 14px;
+        height: 52px;
+    }
+
+    .submit-button {
+        height: 52px;
+    }
+}
+
+/* Tall Phone Optimizations */
+@media (min-height: 700px) and (max-width: 768px) {
+    .contact-section {
+        padding-top: 40px;
+    }
+
+    .info-item {
+        min-height: 90px;
+    }
+
+    .input-wrapper textarea {
+        min-height: 140px;
     }
 }
 
@@ -2171,6 +2273,14 @@ margin-top: -7%;
     .input-wrapper textarea {
         font-size: 16px !important;
         line-height: 1.4;
+    }
+    
+    /* Prevent zoom on focus */
+    @media (max-width: 768px) {
+        select, textarea, input[type="text"], input[type="tel"],
+        input[type="email"], input[type="password"] {
+            font-size: 16px !important;
+        }
     }
 }
 /* Footer */
@@ -2421,7 +2531,7 @@ padding-top: 30px;
 /* Responsive Design */
 @media (max-width: 1200px) {
     .container {
-        padding: 0 40px;
+        padding: 0 10px;
     }
 }
 
@@ -3048,4 +3158,4 @@ padding-top: 30px;
 .footer [href^="mailto:"]:hover {
     color: var(--accent) !important;
     opacity: 1;
-}
+}</style>
